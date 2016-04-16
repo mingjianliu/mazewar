@@ -43,186 +43,184 @@ SOFTWARE.
 #ifndef MAZEWAR_H
 #define MAZEWAR_H
 
-
 #include "fwk/NamedInterface.h"
 
-#include "Nominal.h"
 #include "Exception.h"
+#include "Nominal.h"
 #include <string>
 /* fundamental constants */
 
-#ifndef	TRUE
-#define	TRUE		1
-#define	FALSE		0
-#endif	/* TRUE */
+#ifndef TRUE
+#define TRUE 1
+#define FALSE 0
+#endif /* TRUE */
 
 /* You can modify this if you want to */
-#define	MAX_RATS	8
+#define MAX_RATS 8
 
 /* network stuff */
 /* Feel free to modify.  This is the simplest version we came up with */
 
 /* A unique MAZEPORT will be assigned to your team by the TA */
-#define	MAZEPORT	5000
+#define MAZEPORT 5000
 /* The multicast group for Mazewar is 224.1.1.1 */
-#define MAZEGROUP       0xe0010101
-#define	MAZESERVICE	"mazewar244B"
+#define MAZEGROUP 0xe0010101
+#define MAZESERVICE "mazewar244B"
 
 /* The next two >must< be a power of two, because we subtract 1 from them
    to get a bitmask for random()
  */
-#define	MAZEXMAX	32
-#define	MAZEYMAX	16
-#define	VECTORSIZE	55
-#define	NAMESIZE	20
-#define	NDIRECTION	4
-#define	NORTH		0
-#define	SOUTH		1
-#define	EAST		2
-#define	WEST		3
-#define	NVIEW		4
-#define	LEFT		0
-#define	RIGHT		1
-#define	REAR		2
-#define	FRONT		3
+#define MAZEXMAX 32
+#define MAZEYMAX 16
+#define VECTORSIZE 55
+#define NAMESIZE 20
+#define NDIRECTION 4
+#define NORTH 0
+#define SOUTH 1
+#define EAST 2
+#define WEST 3
+#define NVIEW 4
+#define LEFT 0
+#define RIGHT 1
+#define REAR 2
+#define FRONT 3
 
 /* types */
 
-typedef	struct sockaddr_in			Sockaddr;
-typedef bool	               		MazeRow[MAZEYMAX];
-typedef	MazeRow						MazeType [MAZEXMAX];
-typedef	MazeRow						*MazeTypePtr;
-//typedef	short						Direction;
-typedef	struct {short	x, y; }		XYpoint;
-typedef	struct {XYpoint	p1, p2;}	XYpair;
-typedef	struct {short	xcor, ycor;}XY;
-typedef	struct {unsigned short	bits[16];}	BitCell;
-typedef	char						RatName[NAMESIZE];
+typedef struct sockaddr_in Sockaddr;
+typedef bool MazeRow[MAZEYMAX];
+typedef MazeRow MazeType[MAZEXMAX];
+typedef MazeRow *MazeTypePtr;
+// typedef	short						Direction;
+typedef struct { short x, y; } XYpoint;
+typedef struct { XYpoint p1, p2; } XYpair;
+typedef struct { short xcor, ycor; } XY;
+typedef struct { unsigned short bits[16]; } BitCell;
+typedef char RatName[NAMESIZE];
 
-
- 	class Direction : public Ordinal<Direction, short> {
-	public:
-		Direction(short num) : Ordinal<Direction, short>(num) {
-			if(num<NORTH || num>NDIRECTION){
-				throw RangeException("Error: Unexpected value.\n");
-			}
-		}
-	};
-
- 	class Loc : public Ordinal<Loc, short> {
-	public:
-		Loc(short num) : Ordinal<Loc, short>(num) {
-			if(num<0){
-				throw RangeException("Error: Unexpected negative value.\n");
-			}
-		}
-	};
-
- 	class Score : public Ordinal<Score, int> {
-	public:
-		Score(int num) : Ordinal<Score, int>(num) {}
-	};
-
-
- 	class RatIndexType : public Ordinal<RatIndexType, int> {
-	public:
-		RatIndexType(int num) : Ordinal<RatIndexType, int>(num) {
-			if(num<0){
-				throw RangeException("Error: Unexpected negative value.\n");
-			}
-		}
-	};
-
- 	class RatId : public Ordinal<RatId, unsigned short> {
-	public:
-		RatId(unsigned short num) : Ordinal<RatId, unsigned short>(num) {
-		}
-	};
-
- 	class TokenId : public Ordinal<TokenId, long> {
-	public:
-		TokenId(long num) : Ordinal<TokenId, long>(num) {}
-	};
-
-
-class RatAppearance{
-
-	public:
-		RatAppearance() :  x(1), y(1), tokenId(0) {};
-		bool	visible;
-		Loc	x, y;
-		short	distance;
-		TokenId	tokenId;
+class Direction : public Ordinal<Direction, short> {
+public:
+  Direction(short num) : Ordinal<Direction, short>(num) {
+    if (num < NORTH || num > NDIRECTION) {
+      throw RangeException("Error: Unexpected value.\n");
+    }
+  }
 };
 
-class Rat{
+class Loc : public Ordinal<Loc, short> {
+public:
+  Loc(short num) : Ordinal<Loc, short>(num) {
+    if (num < 0) {
+      throw RangeException("Error: Unexpected negative value.\n");
+    }
+  }
+};
+
+class Score : public Ordinal<Score, int> {
+public:
+  Score(int num) : Ordinal<Score, int>(num) {}
+};
+
+class RatIndexType : public Ordinal<RatIndexType, int> {
+public:
+  RatIndexType(int num) : Ordinal<RatIndexType, int>(num) {
+    if (num < 0) {
+      throw RangeException("Error: Unexpected negative value.\n");
+    }
+  }
+};
+
+class RatId : public Ordinal<RatId, unsigned short> {
+public:
+  RatId(unsigned short num) : Ordinal<RatId, unsigned short>(num) {}
+};
+
+class TokenId : public Ordinal<TokenId, long> {
+public:
+  TokenId(long num) : Ordinal<TokenId, long>(num) {}
+};
+
+class RatAppearance {
 
 public:
-	Rat() :  playing(0), cloaked(0), x(1), y(1), dir(NORTH){};
-	bool playing;
-  bool cloaked;
-	Loc	x, y;
-	Direction dir;
+  RatAppearance() : x(1), y(1), tokenId(0){};
+  bool visible;
+  Loc x, y;
+  short distance;
+  TokenId tokenId;
 };
 
-typedef	RatAppearance			RatApp_type [MAX_RATS];
-typedef	RatAppearance *			RatLook;
+class Rat {
+
+public:
+  Rat() : playing(0), cloaked(0), x(1), y(1), dir(NORTH){};
+  bool playing;
+  bool cloaked;
+  Loc x, y;
+  Direction dir;
+};
+
+typedef RatAppearance RatApp_type[MAX_RATS];
+typedef RatAppearance *RatLook;
 
 /* defined in display.c */
-extern RatApp_type 			Rats2Display;
+extern RatApp_type Rats2Display;
 
 /* variables "exported" by the mazewar "module" */
-class MazewarInstance :  public Fwk::NamedInterface  {
- public:
-    typedef Fwk::Ptr<MazewarInstance const> PtrConst;
-    typedef Fwk::Ptr<MazewarInstance> Ptr;
+class MazewarInstance : public Fwk::NamedInterface {
+public:
+  typedef Fwk::Ptr<MazewarInstance const> PtrConst;
+  typedef Fwk::Ptr<MazewarInstance> Ptr;
 
-	static MazewarInstance::Ptr mazewarInstanceNew(string s){
-      MazewarInstance * m = new MazewarInstance(s);
-      return m;
-    }
+  static MazewarInstance::Ptr mazewarInstanceNew(string s) {
+    MazewarInstance *m = new MazewarInstance(s);
+    return m;
+  }
 
-    inline Direction dir() const { return dir_; }
-    void dirIs(Direction dir) { this->dir_ = dir; }
-    inline Direction dirPeek() const { return dirPeek_; }
-    void dirPeekIs(Direction dirPeek) { this->dirPeek_ = dirPeek; }
+  inline Direction dir() const { return dir_; }
+  void dirIs(Direction dir) { this->dir_ = dir; }
+  inline Direction dirPeek() const { return dirPeek_; }
+  void dirPeekIs(Direction dirPeek) { this->dirPeek_ = dirPeek; }
 
-    inline long mazePort() const { return mazePort_; }
-    void mazePortIs(long  mazePort) { this->mazePort_ = mazePort; }
-    inline Sockaddr* myAddr() const { return myAddr_; }
-    void myAddrIs(Sockaddr *myAddr) { this->myAddr_ = myAddr; }
-    inline RatId myRatId() const { return myRatId_; }
-    void myRatIdIs(RatId myRatId) { this->myRatId_ = myRatId; }
+  inline long mazePort() const { return mazePort_; }
+  void mazePortIs(long mazePort) { this->mazePort_ = mazePort; }
+  inline Sockaddr *myAddr() const { return myAddr_; }
+  void myAddrIs(Sockaddr *myAddr) { this->myAddr_ = myAddr; }
+  inline RatId myRatId() const { return myRatId_; }
+  void myRatIdIs(RatId myRatId) { this->myRatId_ = myRatId; }
 
-    inline bool peeking() const { return peeking_; }
-    void peekingIs(bool peeking) { this->peeking_ = peeking; }
-    inline int theSocket() const { return theSocket_; }
-    void theSocketIs(int theSocket) { this->theSocket_ = theSocket; }
-    inline Score score() const { return score_; }
-    void scoreIs(Score score) { this->score_ = score; }
-    inline Loc xloc() const { return xloc_; }
-    void xlocIs(Loc xloc) { this->xloc_ = xloc; }
-    inline Loc yloc() const { return yloc_; }
-    void ylocIs(Loc yloc) { this->yloc_ = yloc; }
-    inline Loc xPeek() const { return xPeek_; }
-    void xPeekIs(Loc xPeek) { this->xPeek_ = xPeek; }
-    inline Loc yPeek() const { return yPeek_; }
-    void yPeekIs(Loc yPeek) { this->yPeek_ = yPeek; }
-    inline int active() const { return active_; }
-    void activeIs(int active) { this->active_ = active; }
-    inline Rat rat(RatIndexType num) const { return mazeRats_[num.value()]; }
-    void ratIs(Rat rat, RatIndexType num) { this->mazeRats_[num.value()] = rat; }
+  inline bool peeking() const { return peeking_; }
+  void peekingIs(bool peeking) { this->peeking_ = peeking; }
+  inline int theSocket() const { return theSocket_; }
+  void theSocketIs(int theSocket) { this->theSocket_ = theSocket; }
+  inline Score score() const { return score_; }
+  void scoreIs(Score score) { this->score_ = score; }
+  inline Loc xloc() const { return xloc_; }
+  void xlocIs(Loc xloc) { this->xloc_ = xloc; }
+  inline Loc yloc() const { return yloc_; }
+  void ylocIs(Loc yloc) { this->yloc_ = yloc; }
+  inline Loc xPeek() const { return xPeek_; }
+  void xPeekIs(Loc xPeek) { this->xPeek_ = xPeek; }
+  inline Loc yPeek() const { return yPeek_; }
+  void yPeekIs(Loc yPeek) { this->yPeek_ = yPeek; }
+  inline int active() const { return active_; }
+  void activeIs(int active) { this->active_ = active; }
+  inline Rat rat(RatIndexType num) const { return mazeRats_[num.value()]; }
+  void ratIs(Rat rat, RatIndexType num) { this->mazeRats_[num.value()] = rat; }
 
-    MazeType maze_;
-    RatName myName_;
+  MazeType maze_;
+  RatName myName_;
+
 protected:
-	MazewarInstance(string s) : Fwk::NamedInterface(s), dir_(0), dirPeek_(0), myRatId_(0), score_(0),xloc_(1), yloc_(3), xPeek_(0), yPeek_(0) {
-		myAddr_ = (Sockaddr*)malloc(sizeof(Sockaddr));
-		  if(!myAddr_) {
-		  printf("Error allocating sockaddr variable");
-		}
-	}
-	Direction	dir_;
+  MazewarInstance(string s)
+      : Fwk::NamedInterface(s), dir_(0), dirPeek_(0), myRatId_(0), score_(0),
+        xloc_(1), yloc_(3), xPeek_(0), yPeek_(0) {
+    myAddr_ = (Sockaddr *)malloc(sizeof(Sockaddr));
+    if (!myAddr_) {
+      printf("Error allocating sockaddr variable");
+    }
+  }
+  Direction dir_;
   Direction dirPeek_;
 
   long mazePort_;
@@ -241,46 +239,46 @@ protected:
 };
 extern MazewarInstance::Ptr M;
 
-#define MY_RAT_INDEX		0
-#define MY_DIR			M->dir().value()
-#define MY_X_LOC		M->xloc().value()
-#define MY_Y_LOC		M->yloc().value()
+#define MY_RAT_INDEX 0
+#define MY_DIR M->dir().value()
+#define MY_X_LOC M->xloc().value()
+#define MY_Y_LOC M->yloc().value()
 
 /* events */
 
-#define	EVENT_A		1		/* user pressed "A" */
-#define	EVENT_S		2		/* user pressed "S" */
-#define	EVENT_F		3		/* user pressed "F" */
-#define	EVENT_D		4		/* user pressed "D" */
-#define	EVENT_G		5		/* user pressed "G" */
-#define	EVENT_C		6		/* user pressed "C" */
-#define	EVENT_BAR	7		/* user pressed space bar */
+#define EVENT_A 1   /* user pressed "A" */
+#define EVENT_S 2   /* user pressed "S" */
+#define EVENT_F 3   /* user pressed "F" */
+#define EVENT_D 4   /* user pressed "D" */
+#define EVENT_G 5   /* user pressed "G" */
+#define EVENT_C 6   /* user pressed "C" */
+#define EVENT_BAR 7 /* user pressed space bar */
 
-#define	EVENT_LEFT_D	30		/* user pressed left mouse button */
-#define	EVENT_RIGHT_D	31		/* user pressed right button */
-#define	EVENT_MIDDLE_D	32		/* user pressed middle button */
-#define	EVENT_LEFT_U	33		/* user released l.M.b */
-#define	EVENT_RIGHT_U	34		/* user released r.M.b */
+#define EVENT_LEFT_D 30   /* user pressed left mouse button */
+#define EVENT_RIGHT_D 31  /* user pressed right button */
+#define EVENT_MIDDLE_D 32 /* user pressed middle button */
+#define EVENT_LEFT_U 33   /* user released l.M.b */
+#define EVENT_RIGHT_U 34  /* user released r.M.b */
 
-#define	EVENT_NETWORK	50		/* incoming network packet */
-#define	EVENT_INT	51		/* user pressed interrupt key */
-#define	EVENT_TIMEOUT	52		/* nothing happened! */
+#define EVENT_NETWORK 50 /* incoming network packet */
+#define EVENT_INT 51     /* user pressed interrupt key */
+#define EVENT_TIMEOUT 52 /* nothing happened! */
 
-extern unsigned short	ratBits[];
+extern unsigned short ratBits[];
 /* replace this with appropriate definition of your own */
-typedef	struct {
-	unsigned char type;
-	u_long	body[256];
-}					MW244BPacket;
+typedef struct {
+  unsigned char type;
+  u_long body[256];
+} MW244BPacket;
 
-typedef	struct {
-	short		eventType;
-	MW244BPacket	*eventDetail;	/* for incoming data */
-	Sockaddr	eventSource;
-}					MWEvent;
+typedef struct {
+  short eventType;
+  MW244BPacket *eventDetail; /* for incoming data */
+  Sockaddr eventSource;
+} MWEvent;
 
-void		*malloc();
-Sockaddr	*resolveHost();
+void *malloc();
+Sockaddr *resolveHost();
 
 /* display.c */
 void InitDisplay(int, char **);
@@ -300,7 +298,6 @@ void FlipBitmaps(void);
 void bitFlip(BitCell *, int size);
 void SwapBitmaps(void);
 void byteSwap(BitCell *, int size);
-
 
 /* init.c */
 void MazeInit(int, char **);
@@ -332,7 +329,7 @@ void quit(int);
 void NewPosition(MazewarInstance::Ptr M);
 void MWError(char *);
 Score GetRatScore(RatIndexType);
-char  *GetRatName(RatIndexType);
+char *GetRatName(RatIndexType);
 void ConvertIncoming(MW244BPacket *);
 void ConvertOutgoing(MW244BPacket *);
 void ratState(void);
@@ -341,8 +338,6 @@ void DoViewUpdate(void);
 void sendPacketToPlayer(RatId);
 void processPacket(MWEvent *);
 void netInit(void);
-
-
 
 /* winsys.c */
 void InitWindow(int, char **);
@@ -360,8 +355,7 @@ void WriteScoreString(RatIndexType);
 void ClearScoreLine(RatIndexType);
 void InvertScoreLine(RatIndexType);
 void NotifyPlayer(void);
-void DrawString(const char*, uint32_t, uint32_t, uint32_t);
+void DrawString(const char *, uint32_t, uint32_t, uint32_t);
 void StopWindow(void);
-
 
 #endif
