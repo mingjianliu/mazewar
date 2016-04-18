@@ -44,7 +44,7 @@ SOFTWARE.
 #define MAZEWAR_H
 
 #include "fwk/NamedInterface.h"
-
+#include <map>
 #include "Exception.h"
 #include "Nominal.h"
 #include <string>
@@ -93,6 +93,8 @@ SOFTWARE.
 #define SIRES 5
 #define SIACK 6
 
+using namespace std;
+
 /* types */
 
 typedef struct sockaddr_in Sockaddr;
@@ -138,9 +140,9 @@ public:
   }
 };
 
-class RatId : public Ordinal<RatId, unsigned short> {
+class RatId : public Ordinal<RatId, unsigned int> {
 public:
-  RatId(unsigned short num) : Ordinal<RatId, unsigned short>(num) {}
+  RatId(unsigned int num) : Ordinal<RatId, unsigned int>(num) {}
 };
 
 class TokenId : public Ordinal<TokenId, long> {
@@ -158,10 +160,17 @@ public:
   TokenId tokenId;
 };
 
+struct Missile{
+								Missile() : exist(false), x(0), y(0), dir(NORTH) {};
+								bool exist;
+								Loc x, y;
+								Direction dir;
+};
+
 class Rat {
 
 public:
-  Rat() : playing(0), cloaked(0), x(1), y(1), dir(NORTH){}, RatMissile(0, 1, 2, 3){};
+  Rat() : playing(0), cloaked(0), x(1), y(1), dir(NORTH){};
   bool playing;
   bool cloaked;
   Loc x, y;
@@ -172,13 +181,6 @@ public:
 typedef RatAppearance RatApp_type[MAX_RATS];
 typedef RatAppearance *RatLook;
 
-class Missile{
-				public:
-								Missile() : exist(false), x(0), y(0), dir(NORTH) {};
-								bool exist;
-								Loc x, y;
-								Direction dir;
-};
 
 
 
@@ -229,8 +231,7 @@ public:
 
   MazeType maze_;
   RatName myName_;
-	MW_Rat_Id my_RatId;
-	std::unordered_map<MW_Rat_Id, Rat> OtherRats;
+	std::map<RatId, Rat> OtherRats;
 
 protected:
   MazewarInstance(string s)

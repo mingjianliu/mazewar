@@ -575,7 +575,7 @@ void netInit() {
   printf("\n");
 
   /* set up some stuff strictly for this local sample */
-  M->myRatIdIs(0);
+  M->myRatIdIs(M->theSocket());
   M->scoreIs(0);
   SetMyRatIndexType(0);
 
