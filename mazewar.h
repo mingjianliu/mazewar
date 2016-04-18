@@ -85,6 +85,14 @@ SOFTWARE.
 #define REAR 2
 #define FRONT 3
 
+#define HEARTBEAR 0
+#define HEARTBEARACK 1
+#define EVENT 2
+#define EVENTACK 3
+#define SIREQ 4
+#define SIRES 5
+#define SIACK 6
+
 /* types */
 
 typedef struct sockaddr_in Sockaddr;
@@ -153,15 +161,26 @@ public:
 class Rat {
 
 public:
-  Rat() : playing(0), cloaked(0), x(1), y(1), dir(NORTH){};
+  Rat() : playing(0), cloaked(0), x(1), y(1), dir(NORTH){}, RatMissile(0, 1, 2, 3){};
   bool playing;
   bool cloaked;
   Loc x, y;
   Direction dir;
+	Missile[4] RatMissile;
 };
 
 typedef RatAppearance RatApp_type[MAX_RATS];
 typedef RatAppearance *RatLook;
+
+class Missile{
+				public:
+								Missile() : exist(false), x(0), y(0), dir(NORTH) {};
+								bool exist;
+								Loc x, y;
+								Direction dir;
+};
+
+
 
 /* defined in display.c */
 extern RatApp_type Rats2Display;
@@ -210,6 +229,8 @@ public:
 
   MazeType maze_;
   RatName myName_;
+	MW_Rat_Id my_RatId;
+	std::unordered_map<MW_Rat_Id, Rat> OtherRats;
 
 protected:
   MazewarInstance(string s)
