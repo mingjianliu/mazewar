@@ -166,7 +166,11 @@ public:
   bool cloaked;
   Loc x, y;
   Direction dir;
+<<<<<<< HEAD
 	Missile RatMissile[4];
+=======
+	Missile[4] RatMissile;
+>>>>>>> bdc4653430074d998c4a429b523bf78ecddd4126
 };
 
 typedef RatAppearance RatApp_type[MAX_RATS];
