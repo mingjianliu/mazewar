@@ -6,6 +6,7 @@
 !_TAG_PROGRAM_VERSION	5.8	//
 APP	Makefile	/^APP = mazewar$/;"	m
 APP_OBJS	Makefile	/^APP_OBJS   = toplevel.o display.o init.o winsys.o$/;"	m
+AllRats	mazewar.h	/^	std::map<RatIndexType, RatId> AllRats;$/;"	m	class:MazewarInstance
 Array	fwk/Array.h	/^   Array() { zeroIfTrue( typename IsPod<T>::Value(), array_, sizeof( array_ )); }$/;"	f	class:Fwk::Array
 Array	fwk/Array.h	/^class Array : public BaseRefCollection<T> {$/;"	c	namespace:Fwk
 ArrayIterator	fwk/Array.h	/^   template< U32 N > ArrayIterator( Array<T,N,K> const & array, U32 start = 0 ) : $/;"	f	class:Fwk::ArrayIterator
@@ -66,6 +67,8 @@ DrawString	winsys.cpp	/^void DrawString(const char *msg, uint32_t length, uint32
 DrawViewLine	winsys.cpp	/^void DrawViewLine(int x1, int y1, int x2, int y2) {$/;"	f
 EAST	mazewar.h	/^#define EAST /;"	d
 EMPTY	display.cpp	/^static BitCell EMPTY = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};$/;"	v	file:
+EVENT	mazewar.h	/^#define EVENT /;"	d
+EVENTACK	mazewar.h	/^#define EVENTACK /;"	d
 EVENT_A	mazewar.h	/^#define EVENT_A /;"	d
 EVENT_BAR	mazewar.h	/^#define EVENT_BAR /;"	d
 EVENT_C	mazewar.h	/^#define EVENT_C /;"	d
@@ -139,8 +142,10 @@ Fwk	fwk/PtrInterface.h	/^namespace Fwk {$/;"	n
 Fwk	fwk/String.h	/^namespace Fwk {$/;"	n
 Fwk	fwk/TypeTraits.h	/^namespace Fwk {$/;"	n
 Fwk	fwk/Types.h	/^namespace Fwk {$/;"	n
-GetRatName	toplevel.cpp	/^char *GetRatName(RatIndexType ratId) {$/;"	f
+GetRatName	toplevel.cpp	/^char *GetRatName(RatIndexType ratIndex) {$/;"	f
 GetRatScore	toplevel.cpp	/^Score GetRatScore(RatIndexType ratId) {$/;"	f
+HEARTBEAR	mazewar.h	/^#define HEARTBEAR /;"	d
+HEARTBEARACK	mazewar.h	/^#define HEARTBEARACK /;"	d
 HackMazeBitmap	winsys.cpp	/^void HackMazeBitmap(Loc x, Loc y, BitCell *newBits) {$/;"	f
 HashMap	fwk/HashMap.h	/^   HashMap( U32 _buckets=bkts) : version_(1), members_(0) {$/;"	f	class:Fwk::HashMap
 HashMap	fwk/HashMap.h	/^   HashMap( const Self & hm ) {$/;"	f	class:Fwk::HashMap
@@ -295,6 +300,8 @@ MemoryException	fwk/Exception.h	/^class MemoryException : public Exception {$/;"
 MemoryLimitExceededException	fwk/Exception.h	/^   MemoryLimitExceededException(String what) : MemoryException(what) {}$/;"	f	class:Fwk::MemoryLimitExceededException
 MemoryLimitExceededException	fwk/Exception.h	/^class MemoryLimitExceededException : public MemoryException {$/;"	c	namespace:Fwk
 MiddleButton	winsys.cpp	/^#define MiddleButton /;"	d	file:
+Missile	mazewar.h	/^								Missile() : exist(false), x(0), y(0), dir(NORTH) {};$/;"	f	struct:Missile
+Missile	mazewar.h	/^struct Missile{$/;"	s
 MountException	fwk/Exception.h	/^   MountException( String what ) : Exception( what ) {} $/;"	f	class:Fwk::MountException
 MountException	fwk/Exception.h	/^class MountException : public Exception {$/;"	c	namespace:Fwk
 NAMESIZE	mazewar.h	/^#define NAMESIZE /;"	d
@@ -303,6 +310,7 @@ NDIR	display.cpp	/^#undef NDIR$/;"	d	file:
 NDIRECTION	mazewar.h	/^#define NDIRECTION /;"	d
 NORTH	mazewar.h	/^#define NORTH /;"	d
 NVIEW	mazewar.h	/^#define NVIEW /;"	d
+Name	mazewar.h	/^	RatName Name;$/;"	m	class:Rat
 NameInUseException	Exception.h	/^  NameInUseException(string info) : Exception(info){};$/;"	f	class:NameInUseException
 NameInUseException	Exception.h	/^class NameInUseException : public Exception {$/;"	c
 NameInUseException	fwk/Exception.h	/^   NameInUseException( String what ) : Exception( what ) {} $/;"	f	class:Fwk::NameInUseException
@@ -360,11 +368,12 @@ RatApp_type	mazewar.h	/^typedef RatAppearance RatApp_type[MAX_RATS];$/;"	t
 RatAppearance	mazewar.h	/^  RatAppearance() : x(1), y(1), tokenId(0){};$/;"	f	class:RatAppearance
 RatAppearance	mazewar.h	/^class RatAppearance {$/;"	c
 RatCursor	winsys.cpp	/^void RatCursor(void) {$/;"	f
-RatId	mazewar.h	/^  RatId(unsigned short num) : Ordinal<RatId, unsigned short>(num) {}$/;"	f	class:RatId
-RatId	mazewar.h	/^class RatId : public Ordinal<RatId, unsigned short> {$/;"	c
+RatId	mazewar.h	/^  RatId(unsigned int num) : Ordinal<RatId, unsigned int>(num) {}$/;"	f	class:RatId
+RatId	mazewar.h	/^class RatId : public Ordinal<RatId, unsigned int> {$/;"	c
 RatIndexType	mazewar.h	/^  RatIndexType(int num) : Ordinal<RatIndexType, int>(num) {$/;"	f	class:RatIndexType
 RatIndexType	mazewar.h	/^class RatIndexType : public Ordinal<RatIndexType, int> {$/;"	c
 RatLook	mazewar.h	/^typedef RatAppearance *RatLook;$/;"	t
+RatMissile	mazewar.h	/^	Missile RatMissile[4];$/;"	m	class:Rat
 RatName	mazewar.h	/^typedef char RatName[NAMESIZE];$/;"	t
 Rats2Display	display.h	/^RatApp_type Rats2Display;$/;"	v
 RightButton	winsys.cpp	/^#define RightButton /;"	d	file:
@@ -381,6 +390,9 @@ SCORE_Y_DIM	winsys.cpp	/^#define SCORE_Y_DIM /;"	d	file:
 SCORE_Y_ORIGIN	winsys.cpp	/^#define SCORE_Y_ORIGIN /;"	d	file:
 SED	Makefile	/^SED        = sed$/;"	m
 SH	Makefile	/^SH         = \/bin\/sh$/;"	m
+SIACK	mazewar.h	/^#define SIACK /;"	d
+SIREQ	mazewar.h	/^#define SIREQ /;"	d
+SIRES	mazewar.h	/^#define SIRES /;"	d
 SOUTH	mazewar.h	/^#define SOUTH /;"	d
 Score	mazewar.h	/^  Score(int num) : Ordinal<Score, int>(num) {}$/;"	f	class:Score
 Score	mazewar.h	/^class Score : public Ordinal<Score, int> {$/;"	c
@@ -549,7 +561,7 @@ byteSwap	display.cpp	/^void byteSwap(register BitCell *bits, int size) {$/;"	f
 c2Delta	display.cpp	/^static XY c2Delta[NDIR] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};$/;"	v	file:
 clearPosition	display.cpp	/^void clearPosition(RatIndexType ratIndex, Loc xClear, Loc yClear) {$/;"	f
 clearSquare	display.cpp	/^void clearSquare(Loc xClear, Loc yClear) {$/;"	f
-cloak	toplevel.cpp	/^void cloak() { printf("Implement cloak()\\n"); }$/;"	f
+cloak	toplevel.cpp	/^void cloak() { $/;"	f
 cloaked	mazewar.h	/^  bool cloaked;$/;"	m	class:Rat
 cloneState__	fwk/BaseNotifiee.h	/^     cloneState__ = 23,$/;"	e	enum:Fwk::RootNotifiee::AttributeId
 clone__	fwk/BaseNotifiee.h	/^     clone__ = 4,$/;"	e	enum:Fwk::RootNotifiee::AttributeId
@@ -590,6 +602,7 @@ deletePtr	fwk/LinkedQueue.h	/^      void deletePtr() {$/;"	f	class:Fwk::LinkedQu
 deletePtr	fwk/ListRaw.h	/^      void deletePtr() {$/;"	f	class:Fwk::ListRaw::LrIterator
 deleteRef	fwk/PtrInterface.h	/^PtrInterface<T>::deleteRef() const {$/;"	f	class:Fwk::PtrInterface
 deleteRef__	fwk/BaseNotifiee.h	/^     deleteRef__ = 10,$/;"	e	enum:Fwk::RootNotifiee::AttributeId
+dir	mazewar.h	/^								Direction dir;$/;"	m	struct:Missile
 dir	mazewar.h	/^  Direction dir;$/;"	m	class:Rat
 dir	mazewar.h	/^  inline Direction dir() const { return dir_; }$/;"	f	class:MazewarInstance
 dirIs	mazewar.h	/^  void dirIs(Direction dir) { this->dir_ = dir; }$/;"	f	class:MazewarInstance
@@ -630,6 +643,7 @@ error	fwk/Exception.h	/^   int error() const { return errno_; }$/;"	f	class:Fwk:
 eventDetail	mazewar.h	/^  MW244BPacket *eventDetail; \/* for incoming data *\/$/;"	m	struct:__anon7
 eventSource	mazewar.h	/^  Sockaddr eventSource;$/;"	m	struct:__anon7
 eventType	mazewar.h	/^  short eventType;$/;"	m	struct:__anon7
+exist	mazewar.h	/^								bool exist;$/;"	m	struct:Missile
 fg_pixel	winsys.cpp	/^  Pixel fg_pixel;    \/* color of lines and such *\/$/;"	m	struct:_resources	file:
 filename	fwk/Exception.h	/^   String filename() const { return filename_; }$/;"	f	class:Fwk::ErrnoException
 filename_	fwk/Exception.h	/^   String filename_;$/;"	m	class:Fwk::ErrnoException
@@ -823,10 +837,13 @@ mwWindow	winsys.cpp	/^Window mwWindow;                          \/* parent windo
 myAddr	mazewar.h	/^  inline Sockaddr *myAddr() const { return myAddr_; }$/;"	f	class:MazewarInstance
 myAddrIs	mazewar.h	/^  void myAddrIs(Sockaddr *myAddr) { this->myAddr_ = myAddr; }$/;"	f	class:MazewarInstance
 myAddr_	mazewar.h	/^  Sockaddr *myAddr_;$/;"	m	class:MazewarInstance
+myIndex	mazewar.h	/^	inline RatIndexType myIndex() const { return this->myRatIndex_;}$/;"	f	class:MazewarInstance
+myIndexIs	mazewar.h	/^	void myIndexIs(RatIndexType index){ this->myRatIndex_ = index;}$/;"	f	class:MazewarInstance
 myName_	mazewar.h	/^  RatName myName_;$/;"	m	class:MazewarInstance
 myRatId	mazewar.h	/^  inline RatId myRatId() const { return myRatId_; }$/;"	f	class:MazewarInstance
 myRatIdIs	mazewar.h	/^  void myRatIdIs(RatId myRatId) { this->myRatId_ = myRatId; }$/;"	f	class:MazewarInstance
 myRatId_	mazewar.h	/^  RatId myRatId_;$/;"	m	class:MazewarInstance
+myRatIndex_	mazewar.h	/^  RatIndexType myRatIndex_;$/;"	m	class:MazewarInstance
 name	fwk/BaseNotifiee.cpp	/^String RootNotifiee::name() const { return "unknown"; }$/;"	f	class:Fwk::RootNotifiee
 name	fwk/NamedInterface.h	/^	String name() const { return name_; }$/;"	f	class:Fwk::NamedInterface
 nameInUseException_	fwk/Exception.h	/^      nameInUseException_ = 11,$/;"	e	enum:Fwk::Exception::Id
@@ -1014,12 +1031,12 @@ quit	toplevel.cpp	/^void quit(int sig) {$/;"	f
 r1Delta	display.cpp	/^static XY r1Delta[NDIR] = {{0, 1}, {0, -1}, {-1, 0}, {1, 0}};$/;"	v	file:
 r2Delta	display.cpp	/^static XY r2Delta[NDIR] = {{1, 1}, {-1, -1}, {-1, 1}, {1, -1}};$/;"	v	file:
 rangeException_	fwk/Exception.h	/^      rangeException_ = 7,$/;"	e	enum:Fwk::Exception::Id
-rat	mazewar.h	/^  inline Rat rat(RatIndexType num) const { return mazeRats_[num.value()]; }$/;"	f	class:MazewarInstance
+rat	mazewar.h	/^	inline Rat rat(RatIndexType num) const { return mazeRats_[num.value()]; }$/;"	f	class:MazewarInstance
 ratBits	display.h	/^unsigned short ratBits[] = {$/;"	v
 ratBits_height	display.h	/^#define ratBits_height /;"	d
 ratBits_width	display.h	/^#define ratBits_width /;"	d
 ratCursor	winsys.cpp	/^static Cursor ratCursor, deadRatCursor, hourGlassCursor;$/;"	v	file:
-ratIs	mazewar.h	/^  void ratIs(Rat rat, RatIndexType num) { this->mazeRats_[num.value()] = rat; }$/;"	f	class:MazewarInstance
+ratIs	mazewar.h	/^	void ratIs(Rat rat, RatIndexType num) { this->mazeRats_[num.value()] = rat; }$/;"	f	class:MazewarInstance
 ratStates	toplevel.cpp	/^void ratStates() {$/;"	f
 ratsBitmap	winsys.cpp	/^Pixmap ratsBitmap; \/* the rats *\/$/;"	v
 ratsImage	winsys.cpp	/^XImage *ratsImage; \/* the rats *\/$/;"	v
@@ -1051,7 +1068,7 @@ score_	mazewar.h	/^  Score score_;$/;"	m	class:MazewarInstance
 screen	winsys.cpp	/^int screen;                          \/* screen on the display *\/$/;"	v
 sendPacketToPlayer	toplevel.cpp	/^void sendPacketToPlayer(RatId ratId) {$/;"	f
 setRandom	init.cpp	/^void setRandom(void) {$/;"	f
-shoot	toplevel.cpp	/^void shoot() { printf("Implement shoot()\\n"); }$/;"	f
+shoot	toplevel.cpp	/^void shoot() { $/;"	f
 showMe	display.cpp	/^void showMe(Loc x_loc, Loc y_loc, Direction dir) {$/;"	f
 showMissile	display.cpp	/^void showMissile(Loc x_loc, Loc y_loc, Direction dir, Loc prev_x, Loc prev_y,$/;"	f
 size	fwk/HashMap.h	/^   U32 size() const { return 1; }$/;"	f	class:Fwk::HashMap
@@ -1119,6 +1136,7 @@ what	fwk/Exception.h	/^   String what() const { return what_; }$/;"	f	class:Fwk:
 what_	Exception.h	/^  string what_;$/;"	m	class:Exception
 what_	fwk/Exception.h	/^   String what_;$/;"	m	class:Fwk::Exception
 x	fwk/BaseCollection.h	/^      struct BoolConversion { int x; }; \/\/ better than operator bool$/;"	m	struct:Fwk::BaseCollection::StrepIterator::BoolConversion
+x	mazewar.h	/^								Loc x, y;$/;"	m	struct:Missile
 x	mazewar.h	/^  Loc x, y;$/;"	m	class:Rat
 x	mazewar.h	/^  Loc x, y;$/;"	m	class:RatAppearance
 x	mazewar.h	/^typedef struct { short x, y; } XYpoint;$/;"	m	struct:__anon2
@@ -1131,6 +1149,7 @@ xloc	mazewar.h	/^  inline Loc xloc() const { return xloc_; }$/;"	f	class:Mazewar
 xlocIs	mazewar.h	/^  void xlocIs(Loc xloc) { this->xloc_ = xloc; }$/;"	f	class:MazewarInstance
 xloc_	mazewar.h	/^  Loc xloc_;$/;"	m	class:MazewarInstance
 xorGC	winsys.cpp	/^GC copyGC, xorGC;                    \/* graphics contexts for window *\/$/;"	v
+y	mazewar.h	/^								Loc x, y;$/;"	m	struct:Missile
 y	mazewar.h	/^  Loc x, y;$/;"	m	class:Rat
 y	mazewar.h	/^  Loc x, y;$/;"	m	class:RatAppearance
 y	mazewar.h	/^typedef struct { short x, y; } XYpoint;$/;"	m	struct:__anon2

@@ -395,12 +395,12 @@ void MWError(char *s)
 /* ----------------------------------------------------------------------- */
 
 /* This is just for the sample version, rewrite your own */
-Score GetRatScore(RatIndexType ratId) {
-  if (ratId.value() == M->myRatId().value()) {
-    return (M->score());
-  } else {
-    return (0);
-  }
+Score GetRatScore(RatIndexType ratIndex) {
+				if (ratIndex.value() == M->myIndex().value()) {
+								return (M->score());
+				} else {
+								return M->rat(ratIndex).score;		
+				}
 }
 
 /* ----------------------------------------------------------------------- */
@@ -583,9 +583,9 @@ void netInit() {
 
   /* set up some stuff strictly for this local sample */
   M->myRatIdIs(htonl(thisHost->sin_addr.s_addr));
-  
   M->scoreIs(0);
   SetMyRatIndexType(0);
+	M->AllRats.insert({M->myIndex(), M->myRatId()});
 
   /* Get the multi-cast address ready to use in SendData()
      calls. */

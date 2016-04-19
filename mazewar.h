@@ -170,12 +170,13 @@ struct Missile{
 class Rat {
 
 public:
-  Rat() : playing(0), cloaked(0), x(1), y(1), dir(NORTH){};
+  Rat() : playing(0), cloaked(0), x(1), y(1), score(0), dir(NORTH){};
 	RatName Name;
   bool playing;
   bool cloaked;
   Loc x, y;
   Direction dir;
+	Score score;
 	Missile RatMissile[4];
 };
 
@@ -228,21 +229,7 @@ public:
   inline int active() const { return active_; }
   void activeIs(int active) { this->active_ = active; }
 	inline Rat rat(RatIndexType num) const { return mazeRats_[num.value()]; }
-	//				inline Rat rat(RatIndexType num) const { 
-	//									auto iter = AllRats.find(num);
-	//									if (iter != AllRats.end())
-	//													return iter->second;
-	//									else 
-	//													throw "Look for RatId doesn't exist!";
-	//					}
 	void ratIs(Rat rat, RatIndexType num) { this->mazeRats_[num.value()] = rat; }
-	//void ratIs(Rat rat, RatIndexType num) {
-	//					auto iter = AllRats.find(num);
-	//					if (iter != AllRats.end())
-	//									iter->second = rat;
-	//					else 
-	//								  AllRats.insert({num, rat});	
-	//	}
 	inline RatIndexType myIndex() const { return this->myRatIndex_;}
 	void myIndexIs(RatIndexType index){ this->myRatIndex_ = index;}
 
