@@ -45,6 +45,7 @@ SOFTWARE.
 
 #include "fwk/NamedInterface.h"
 #include <map>
+#include <set>
 #include "Exception.h"
 #include "Nominal.h"
 #include <string>
@@ -70,6 +71,7 @@ SOFTWARE.
 /* The next two >must< be a power of two, because we subtract 1 from them
    to get a bitmask for random()
  */
+#define MAX_UNCOMMITED 5
 #define MAZEXMAX 32
 #define MAZEYMAX 16
 #define VECTORSIZE 55
@@ -85,13 +87,14 @@ SOFTWARE.
 #define REAR 2
 #define FRONT 3
 
-#define HEARTBEAR 0
-#define HEARTBEARACK 1
+#define HEARTBEAT 0
+#define HEARTBEATACK 1
 #define EVENT 2
 #define EVENTACK 3
-#define SIREQ 4
-#define SIRES 5
-#define SIACK 6
+#define STATEREQUEST 4
+#define STATERESPONSE 5
+#define STATEACK 6
+
 #define MAX_MISSILES 4
 
 using namespace std;
@@ -174,7 +177,7 @@ class Rat {
 public:
   Rat() : playing(0), cloaked(0), x(1), y(1), score(0), dir(NORTH){
 		for(int i=0; i < MAX_MISSILES; i++){
-				this->RatMissile[i] = *new Missile();
+				this->RatMissile[i] = new Missile();
 		}	
 	};
 	RatName Name;
@@ -321,6 +324,112 @@ extern MazewarInstance::Ptr M;
 #define MY_X_LOC M->xloc().value()
 #define MY_Y_LOC M->yloc().value()
 
+/* Protocol packet information*/
+struct heartbeat{
+  uint32_t heartbeatId;
+  uint32_t sourceId;
+};
+
+struct heartbeatACK{
+  uint32_t heartbeatId;
+  uint32_t sourceId;
+	uint32_t destinationId;
+};
+
+struct missileInfo{
+	uint8_t missileId;
+	uint16_t position;
+	uint8_t direction;
+};
+
+struct movement{
+	uint8_t direction;
+	uint8_t speed;
+};
+
+struct born{
+	uint16_t position;
+	uint8_t direction;
+};
+
+struct missileProjection{
+	uint8_t missileId;
+	uint16_t position;
+	uint8_t direction;
+};
+
+struct missileHit{
+	uint32_t ownerId;			
+	uint8_t missileId;
+	uint16_t position;
+	uint8_t direction;
+};
+
+union eventSpecificData{
+	bool cloak;
+	movement moveData;
+	born bornData;
+	missileProjection missileProjData; 
+	missileHit missileHitData;
+};
+
+struct absoluteInfo{
+	uint32_t score;
+  uint16_t position;
+	uint8_t direction;
+	bool cloak;
+	uint8_t missileNumber;
+	missileInfo missiles[4];
+};
+
+struct event{
+  uint8_t type;
+	uint32_t EventId;
+  uint32_t sourceId;
+  absoluteInfo absoInfo;
+	eventSpecificData eventData;
+};
+
+
+
+struct eventACK{
+  uint32_t eventId;
+	uint32_t sourceId;
+	uint32_t destinationId;
+};
+
+struct SIReq{
+	uint32_t sourceId;
+};
+
+struct uncommittedAction{
+  uint8_t type;
+	uint32_t EventId;
+	eventSpecificData eventData;
+};
+
+struct SIRes{
+	uint32_t sourceId;
+	uint32_t destinationId;
+  absoluteInfo absoInfo;
+	uncommittedAction uncommit[MAX_UNCOMMITED];
+};
+
+struct SIACK{
+	uint32_t sourceId;
+	uint32_t destinationId;
+};
+
+typedef union{
+				heartbeat hb_;
+				heartbeatACK hbACK_;
+				event ev_;
+				eventACK evACK_;
+				SIReq SIReq_;
+				SIRes SIRes_;
+				SIACK SIACK_;
+} packetInfo; 
+
 
 /* display.c */
 void InitDisplay(int, char **);
@@ -356,6 +465,7 @@ bool emptyLeft();
 bool emptyBehind();
 
 /* toplevel.c */
+void JoinGame(void);
 void play(void);
 void aboutFace(void);
 void leftTurn(void);

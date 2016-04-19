@@ -1,4 +1,4 @@
-cscope 15 $HOME/git/mazewar -q 0000001183 0000131189
+cscope 15 $HOME/git/mazewar -q 0000001234 0000133404
 	@Exception.h
 
 1 #iâdeà
@@ -19124,184 +19124,194 @@ MAZEWAR_H
 >
 
 48 
+	~<£t
+>
+
+49 
 	~"Exû±iÚ.h
 "
 
-49 
+50 
 	~"Nomš®.h
 "
 
-50 
+51 
 	~<¡ršg
 >
 
-53 #iâdeà
+54 #iâdeà
 TRUE
 
 
-54 
+55 
 	#TRUE
  1
 
 	)
 
-55 
+56 
 	#FALSE
  0
 
 	)
 
-59 
+60 
 	#MAX_RATS
  8
 
 	)
 
-65 
+66 
 	#MAZEPORT
  5000
 
 	)
 
-67 
+68 
 	#MAZEGROUP
  0xe0010101
 
 	)
 
-68 
+69 
 	#MAZESERVICE
  "mazew¬244B"
 
 	)
 
-73 
+74 
 	#MAZEXMAX
  32
 
 	)
 
-74 
+75 
 	#MAZEYMAX
  16
 
 	)
 
-75 
+76 
 	#VECTORSIZE
  55
 
 	)
 
-76 
+77 
 	#NAMESIZE
  20
 
 	)
 
-77 
+78 
 	#NDIRECTION
  4
 
 	)
 
-78 
+79 
 	#NORTH
  0
 
 	)
 
-79 
+80 
 	#SOUTH
  1
 
 	)
 
-80 
+81 
 	#EAST
  2
 
 	)
 
-81 
+82 
 	#WEST
  3
 
 	)
 
-82 
+83 
 	#NVIEW
  4
 
 	)
 
-83 
+84 
 	#LEFT
  0
 
 	)
 
-84 
+85 
 	#RIGHT
  1
 
 	)
 
-85 
+86 
 	#REAR
  2
 
 	)
 
-86 
+87 
 	#FRONT
  3
 
 	)
 
-88 
-	#HEARTBEAR
+89 
+	#HEARTBEAT
  0
 
 	)
 
-89 
-	#HEARTBEARACK
+90 
+	#HEARTBEATACK
  1
 
 	)
 
-90 
+91 
 	#EVENT
  2
 
 	)
 
-91 
+92 
 	#EVENTACK
  3
 
 	)
 
-92 
+93 
 	#SIREQ
  4
 
 	)
 
-93 
+94 
 	#SIRES
  5
 
 	)
 
-94 
+95 
 	#SIACK
  6
 
 	)
 
-96 
+97 
+	#MAX_MISSILES
+ 4
+
+	)
+
+99 
 usšg
  
 Çme¥aû
@@ -19309,13 +19319,13 @@ usšg
 	g¡d
 ;
 
-100 
+103 
 sockaddr_š
  
 	tSockaddr
 ;
 
-101 
+104 
 boÞ
  
 	tMazeRow
@@ -19323,7 +19333,7 @@ boÞ
 MAZEYMAX
 ];
 
-102 
+105 
 MazeRow
  
 	tMazeTy³
@@ -19331,13 +19341,13 @@ MazeRow
 MAZEXMAX
 ];
 
-103 
+106 
 MazeRow
  *
 	tMazeTy³PŒ
 ;
 
-105 ¡ruù { 
+108 ¡ruù { 
 	mx
 , 
 	my
@@ -19345,7 +19355,7 @@ MazeRow
 	tXYpošt
 ;
 
-106 ¡ruù { 
+109 ¡ruù { 
 XYpošt
  
 	mp1
@@ -19355,7 +19365,7 @@ XYpošt
 	tXY·œ
 ;
 
-107 ¡ruù { 
+110 ¡ruù { 
 	mxcÜ
 , 
 	mycÜ
@@ -19363,19 +19373,19 @@ XYpošt
 	tXY
 ;
 
-108 ¡ruù { 
+111 ¡ruù { 
 	mb™s
 [16]; } 
 	tB™C–l
 ;
 
-109 
+112 
 	tR©Name
 [
 NAMESIZE
 ];
 
-111 
+115 
 þass
  
 	gDœeùiÚ
@@ -19387,11 +19397,11 @@ Ordš®
 DœeùiÚ
 , > {
 
-112 
+116 
 	gpublic
 :
 
-113 
+117 
 DœeùiÚ
 (
 num
@@ -19401,7 +19411,7 @@ Ordš®
 	gnum
 ) {
 
-114 ià(
+118 ià(
 	gnum
  < 
 	gNORTH
@@ -19409,13 +19419,13 @@ Ordš®
 	gNDIRECTION
 ) {
 
-115 
+119 
 throw
  
 RªgeExû±iÚ
 ("Error: Unexpected value.\n");
 
-120 
+124 
 þass
  
 	gLoc
@@ -19427,11 +19437,11 @@ Ordš®
 Loc
 , > {
 
-121 
+125 
 	gpublic
 :
 
-122 
+126 
 Loc
 (
 num
@@ -19441,17 +19451,17 @@ Ordš®
 	gnum
 ) {
 
-123 ià(
+127 ià(
 	gnum
  < 0) {
 
-124 
+128 
 throw
  
 RªgeExû±iÚ
 ("Error: Unexpected‚egative value.\n");
 
-129 
+133 
 þass
  
 	gScÜe
@@ -19463,11 +19473,11 @@ Ordš®
 ScÜe
 , > {
 
-130 
+134 
 	gpublic
 :
 
-131 
+135 
 ScÜe
 (
 num
@@ -19477,7 +19487,7 @@ Ordš®
 	gnum
 ) {}
 
-134 
+138 
 þass
  
 	gR©IndexTy³
@@ -19489,11 +19499,11 @@ Ordš®
 R©IndexTy³
 , > {
 
-135 
+139 
 	gpublic
 :
 
-136 
+140 
 R©IndexTy³
 (
 num
@@ -19503,17 +19513,17 @@ Ordš®
 	gnum
 ) {
 
-137 ià(
+141 ià(
 	gnum
  < 0) {
 
-138 
+142 
 throw
  
 RªgeExû±iÚ
 ("Error: Unexpected‚egative value.\n");
 
-143 
+147 
 þass
  
 	gR©Id
@@ -19525,11 +19535,11 @@ Ordš®
 R©Id
 , > {
 
-144 
+148 
 	gpublic
 :
 
-145 
+149 
 R©Id
 (
 num
@@ -19539,7 +19549,7 @@ Ordš®
 	gnum
 ) {}
 
-148 
+152 
 þass
  
 	gTok’Id
@@ -19551,11 +19561,11 @@ Ordš®
 Tok’Id
 , > {
 
-149 
+153 
 	gpublic
 :
 
-150 
+154 
 Tok’Id
 (
 num
@@ -19565,15 +19575,15 @@ Ordš®
 	gnum
 ) {}
 
-153 þas 
+157 þas 
 	cR©Aµ—¿nû
  {
 
-155 
+159 
 	mpublic
 :
 
-156 
+160 
 	$R©Aµ—¿nû
 (è: 
 	`x
@@ -19583,13 +19593,13 @@ Ordš®
 	$tok’Id
 (0){};
 
-157 
+161 
 boÞ
  
 visibË
 ;
 
-158 
+162 
 Loc
  
 x
@@ -19597,25 +19607,25 @@ x
 y
 ;
 
-159 
+163 
 di¡ªû
 ;
 
-160 
+164 
 Tok’Id
  
 tok’Id
 ;
 
-161 
+165 
 	}
 };
 
-163 
+167 
 	sMissže
 {
 
-164 
+168 
 Missže
 (è: 
 exi¡
@@ -19631,13 +19641,13 @@ dœ
 NORTH
 ) {};
 
-165 
+169 
 boÞ
  
 	mexi¡
 ;
 
-166 
+170 
 Loc
  
 	mx
@@ -19645,21 +19655,21 @@ Loc
 	my
 ;
 
-167 
+171 
 DœeùiÚ
  
 	mdœ
 ;
 
-170 þas 
+174 þas 
 	cR©
  {
 
-172 
+176 
 	mpublic
 :
 
-173 
+177 
 	$R©
 (è: 
 	`¶ayšg
@@ -19670,30 +19680,50 @@ DœeùiÚ
 (1), 
 	`y
 (1), 
+	`scÜe
+(0), 
 	$dœ
 (
 NORTH
-){};
+){
 
-174 
+178 
+i
+=0; i < 
+MAX_MISSILES
+; i++){
+
+179 
+this
+->
+R©Missže
+[
+i
+] = *
+Ãw
+ 
+	`Missže
+();
+
+182 
 R©Name
  
 Name
 ;
 
-175 
+183 
 boÞ
  
 ¶ayšg
 ;
 
-176 
+184 
 boÞ
  
 þßked
 ;
 
-177 
+185 
 Loc
  
 x
@@ -19701,23 +19731,31 @@ x
 y
 ;
 
-178 
+186 
 DœeùiÚ
  
 dœ
 ;
 
-179 
-Missže
+187 
+ScÜe
  
-R©Missže
-[4];
+scÜe
+;
 
-180 
+188 
+Missže
+* 
+R©Missže
+[
+MAX_MISSILES
+];
+
+189 
 	}
 };
 
-182 
+191 
 R©Aµ—¿nû
  
 	tR©Aµ_ty³
@@ -19725,19 +19763,167 @@ R©Aµ—¿nû
 MAX_RATS
 ];
 
-183 
+192 
 R©Aµ—¿nû
  *
 	tR©Look
 ;
 
-189 
+201 
+	#EVENT_A
+ 1
+
+	)
+
+202 
+	#EVENT_S
+ 2
+
+	)
+
+203 
+	#EVENT_F
+ 3
+
+	)
+
+204 
+	#EVENT_D
+ 4
+
+	)
+
+205 
+	#EVENT_G
+ 5
+
+	)
+
+206 
+	#EVENT_C
+ 6
+
+	)
+
+207 
+	#EVENT_BAR
+ 7
+
+	)
+
+209 
+	#EVENT_LEFT_D
+ 30
+
+	)
+
+210 
+	#EVENT_RIGHT_D
+ 31
+
+	)
+
+211 
+	#EVENT_MIDDLE_D
+ 32
+
+	)
+
+212 
+	#EVENT_LEFT_U
+ 33
+
+	)
+
+213 
+	#EVENT_RIGHT_U
+ 34
+
+	)
+
+215 
+	#EVENT_NETWORK
+ 50
+
+	)
+
+216 
+	#EVENT_INT
+ 51
+
+	)
+
+217 
+	#EVENT_TIMEOUT
+ 52
+
+	)
+
+219 
+¿tB™s
+[];
+
+222 
+	mty³
+;
+
+223 
+u_lÚg
+ 
+	mbody
+[256];
+
+224 } 
+	tMW244BPack‘
+;
+
+227 
+	mev’tTy³
+;
+
+228 
+MW244BPack‘
+ *
+	mev’tD‘až
+;
+
+229 
+Sockaddr
+ 
+	mev’tSourû
+;
+
+230 } 
+	tMWEv’t
+;
+
+232 
+	gm­
+<
+	tR©Id
+, 
+	tMW244BPack‘
+> 
+	tAùiÚSlÙ
+;
+
+234 *
+m®loc
+();
+
+235 
+Sockaddr
+ *
+»sÞveHo¡
+();
+
+238 
 R©Aµ_ty³
  
 R©s2Di¥Ïy
 ;
 
-192 þas 
+241 þas 
 	cMazew¬In¡ªû
  : 
 public
@@ -19747,11 +19933,11 @@ Fwk
 NamedIÁ”çû
  {
 
-193 
+242 
 public
 :
 
-194 
+243 
 Fwk
 ::
 	tPŒ
@@ -19761,7 +19947,7 @@ Fwk
 	tPŒCÚ¡
 ;
 
-195 
+244 
 	mFwk
 ::
 	tPŒ
@@ -19769,7 +19955,7 @@ Fwk
 	tMazew¬In¡ªû
 > Ptr;
 
-197 
+246 
 	mMazew¬In¡ªû
 ::
 PŒ
@@ -19781,7 +19967,7 @@ PŒ
 s
 ) {
 
-198 
+247 
 Mazew¬In¡ªû
  *
 m
@@ -19793,11 +19979,11 @@ m
 s
 );
 
-199  
+248  
 m
 ;
 
-202 
+251 
 šlše
  
 DœeùiÚ
@@ -19809,7 +19995,7 @@ dœ_
 	}
 }
 
-203 
+252 
 	$dœIs
 (
 DœeùiÚ
@@ -19823,7 +20009,7 @@ dœ_
 	}
 }
 
-204 
+253 
 šlše
  
 DœeùiÚ
@@ -19835,7 +20021,7 @@ dœP“k_
 	}
 }
 
-205 
+254 
 	$dœP“kIs
 (
 DœeùiÚ
@@ -19849,7 +20035,7 @@ dœP“k_
 	}
 }
 
-207 
+256 
 šlše
  
 	$mazePÜt
@@ -19859,7 +20045,7 @@ mazePÜt_
 	}
 }
 
-208 
+257 
 	$mazePÜtIs
 (
 mazePÜt
@@ -19871,7 +20057,7 @@ mazePÜt_
 	}
 }
 
-209 
+258 
 šlše
  
 Sockaddr
@@ -19883,7 +20069,7 @@ myAddr_
 	}
 }
 
-210 
+259 
 	$myAddrIs
 (
 Sockaddr
@@ -19897,7 +20083,7 @@ myAddr_
 	}
 }
 
-211 
+260 
 šlše
  
 R©Id
@@ -19909,7 +20095,7 @@ myR©Id_
 	}
 }
 
-212 
+261 
 	$myR©IdIs
 (
 R©Id
@@ -19923,7 +20109,7 @@ myR©Id_
 	}
 }
 
-214 
+263 
 šlše
  
 boÞ
@@ -19935,7 +20121,7 @@ boÞ
 	}
 }
 
-215 
+264 
 	$³ekšgIs
 (
 boÞ
@@ -19949,7 +20135,7 @@ this
 	}
 }
 
-216 
+265 
 šlše
  
 	$theSock‘
@@ -19959,7 +20145,7 @@ theSock‘_
 	}
 }
 
-217 
+266 
 	$theSock‘Is
 (
 theSock‘
@@ -19971,7 +20157,7 @@ theSock‘_
 	}
 }
 
-218 
+267 
 šlše
  
 ScÜe
@@ -19983,7 +20169,7 @@ scÜe_
 	}
 }
 
-219 
+268 
 	$scÜeIs
 (
 ScÜe
@@ -19997,7 +20183,7 @@ scÜe_
 	}
 }
 
-220 
+269 
 šlše
  
 Loc
@@ -20009,7 +20195,7 @@ xloc_
 	}
 }
 
-221 
+270 
 	$xlocIs
 (
 Loc
@@ -20023,7 +20209,7 @@ xloc_
 	}
 }
 
-222 
+271 
 šlše
  
 Loc
@@ -20035,7 +20221,7 @@ yloc_
 	}
 }
 
-223 
+272 
 	$ylocIs
 (
 Loc
@@ -20049,7 +20235,7 @@ yloc_
 	}
 }
 
-224 
+273 
 šlše
  
 Loc
@@ -20061,7 +20247,7 @@ xP“k_
 	}
 }
 
-225 
+274 
 	$xP“kIs
 (
 Loc
@@ -20075,7 +20261,7 @@ xP“k_
 	}
 }
 
-226 
+275 
 šlše
  
 Loc
@@ -20087,7 +20273,7 @@ yP“k_
 	}
 }
 
-227 
+276 
 	$yP“kIs
 (
 Loc
@@ -20101,7 +20287,7 @@ yP“k_
 	}
 }
 
-228 
+277 
 šlše
  
 	$aùive
@@ -20111,7 +20297,7 @@ aùive_
 	}
 }
 
-229 
+278 
 	$aùiveIs
 (
 aùive
@@ -20123,7 +20309,7 @@ aùive_
 	}
 }
 
-230 
+279 
 šlše
  
 R©
@@ -20141,7 +20327,7 @@ mazeR©s_
 	}
 }
 
-231 
+280 
 	$¿tIs
 (
 R©
@@ -20161,7 +20347,7 @@ mazeR©s_
 	}
 }
 
-232 
+281 
 šlše
  
 R©IndexTy³
@@ -20175,7 +20361,7 @@ myR©Index_
 	}
 }
 
-233 
+282 
 	$myIndexIs
 (
 R©IndexTy³
@@ -20189,19 +20375,19 @@ myR©Index_
 	}
 }
 
-235 
+284 
 MazeTy³
  
 	gmaze_
 ;
 
-236 
+285 
 R©Name
  
 	gmyName_
 ;
 
-238 
+287 
 	g¡d
 ::
 m­
@@ -20213,11 +20399,23 @@ R©IndexTy³
 	gAÎR©s
 ;
 
-240 
+289 
+AùiÚSlÙ
+ 
+	gcu¼’tSlÙ
+;
+
+290 
+AùiÚSlÙ
+ 
+	gÃxtSlÙ
+;
+
+292 
 	g´Ùeùed
 :
 
-241 
+293 
 	$Mazew¬In¡ªû
 (
 ¡ršg
@@ -20225,7 +20423,7 @@ R©IndexTy³
 s
 )
 
-242 : 
+294 : 
 Fwk
 ::
 	`NamedIÁ”çû
@@ -20241,7 +20439,7 @@ s
 	`scÜe_
 (0),
 
-243 
+295 
 	`xloc_
 (1), 
 	`yloc_
@@ -20253,7 +20451,7 @@ s
 	$myR©Index_
 (0) {
 
-244 
+296 
 myAddr_
  = (
 Sockaddr
@@ -20261,41 +20459,41 @@ Sockaddr
 	`m®loc
 ((Sockaddr));
 
-245 ià(!
+297 ià(!
 myAddr_
 ) {
 
-246 
+298 
 	`´štf
 ("Error‡llocating sockaddr variable");
 
-248 
+300 
 	}
 }
 
-249 
+301 
 DœeùiÚ
  
 	gdœ_
 ;
 
-250 
+302 
 DœeùiÚ
  
 	gdœP“k_
 ;
 
-252 
+304 
 	gmazePÜt_
 ;
 
-253 
+305 
 Sockaddr
  *
 	gmyAddr_
 ;
 
-254 
+306 
 R©
  
 	gmazeR©s_
@@ -20303,63 +20501,63 @@ R©
 MAX_RATS
 ];
 
-255 
+307 
 R©Id
  
 	gmyR©Id_
 ;
 
-256 
+308 
 R©IndexTy³
  
 	gmyR©Index_
 ;
 
-258 
+310 
 boÞ
  
 	g³ekšg_
 ;
 
-259 
+311 
 	gtheSock‘_
 ;
 
-260 
+312 
 ScÜe
  
 	gscÜe_
 ;
 
-261 
+313 
 Loc
  
 	gxloc_
 ;
 
-262 
+314 
 Loc
  
 	gyloc_
 ;
 
-263 
+315 
 Loc
  
 	gxP“k_
 ;
 
-264 
+316 
 Loc
  
 	gyP“k_
 ;
 
-265 
+317 
 	gaùive_
 ;
 
-267 
+319 
 Mazew¬In¡ªû
 ::
 PŒ
@@ -20367,13 +20565,13 @@ PŒ
 M
 ;
 
-269 
+321 
 	#MY_RAT_INDEX
  0
 
 	)
 
-270 
+322 
 	#MY_DIR
  
 M
@@ -20385,7 +20583,7 @@ M
 
 	)
 
-271 
+323 
 	#MY_X_LOC
  
 M
@@ -20397,7 +20595,7 @@ M
 
 	)
 
-272 
+324 
 	#MY_Y_LOC
  
 M
@@ -20409,153 +20607,363 @@ M
 
 	)
 
-276 
-	#EVENT_A
- 1
+327 
+	sh—¹b—t
+{
 
-	)
+328 
+ušt32_t
+ 
+	mh—¹b—tId
+;
 
-277 
-	#EVENT_S
- 2
+329 
+ušt32_t
+ 
+	msourûId
+;
 
-	)
+332 
+	sh—¹b—tACK
+{
 
-278 
-	#EVENT_F
- 3
+333 
+ušt32_t
+ 
+	mh—¹b—tId
+;
 
-	)
+334 
+ušt32_t
+ 
+	msourûId
+;
 
-279 
-	#EVENT_D
- 4
+335 
+ušt32_t
+ 
+	mde¡š©iÚId
+;
 
-	)
+338 
+	smissžeInfo
+{
 
-280 
-	#EVENT_G
- 5
+339 
+ušt8_t
+ 
+	mmissžeId
+;
 
-	)
+340 
+ušt16_t
+ 
+	mpos™iÚ
+;
 
-281 
-	#EVENT_C
- 6
+341 
+ušt8_t
+ 
+	mdœeùiÚ
+;
 
-	)
+344 
+	smovem’t
+{
 
-282 
-	#EVENT_BAR
- 7
+345 
+ušt8_t
+ 
+	mdœeùiÚ
+;
 
-	)
+346 
+ušt8_t
+ 
+	m¥“d
+;
 
-284 
-	#EVENT_LEFT_D
- 30
+349 
+	sbÜn
+{
 
-	)
+350 
+ušt16_t
+ 
+	mpos™iÚ
+;
 
-285 
-	#EVENT_RIGHT_D
- 31
+351 
+ušt8_t
+ 
+	mdœeùiÚ
+;
 
-	)
+354 
+	smissžeProjeùiÚ
+{
 
-286 
-	#EVENT_MIDDLE_D
- 32
+355 
+ušt8_t
+ 
+	mmissžeId
+;
 
-	)
+356 
+ušt16_t
+ 
+	mpos™iÚ
+;
 
-287 
-	#EVENT_LEFT_U
- 33
+357 
+ušt8_t
+ 
+	mdœeùiÚ
+;
 
-	)
+360 
+	smissžeH™
+{
 
-288 
-	#EVENT_RIGHT_U
- 34
+361 
+ušt32_t
+ 
+	mowÃrId
+;
 
-	)
+362 
+ušt8_t
+ 
+	mmissžeId
+;
 
-290 
-	#EVENT_NETWORK
- 50
+363 
+ušt16_t
+ 
+	mpos™iÚ
+;
 
-	)
+364 
+ušt8_t
+ 
+	mdœeùiÚ
+;
 
-291 
-	#EVENT_INT
- 51
+367 
+	uev’tS³cificD©a
+{
 
-	)
+368 
+boÞ
+ 
+	mþßk
+;
 
-292 
-	#EVENT_TIMEOUT
- 52
+369 
+movem’t
+ 
+	mmoveD©a
+;
 
-	)
+370 
+bÜn
+ 
+	mbÜnD©a
+;
 
-294 
-¿tB™s
-[];
+371 
+missžeProjeùiÚ
+ 
+	mmissžeProjD©a
+;
 
-297 
+372 
+missžeH™
+ 
+	mmissžeH™D©a
+;
+
+375 
+	sabsÞu‹Info
+{
+
+376 
+ušt32_t
+ 
+	mscÜe
+;
+
+377 
+ušt16_t
+ 
+	mpos™iÚ
+;
+
+378 
+ušt8_t
+ 
+	mdœeùiÚ
+;
+
+379 
+boÞ
+ 
+	mþßk
+;
+
+380 
+ušt8_t
+ 
+	mmissžeNumb”
+;
+
+381 
+missžeInfo
+ 
+	mmissžes
+[4];
+
+384 
+	sev’t
+{
+
+385 
+ušt8_t
+ 
 	mty³
 ;
 
-298 
-u_lÚg
+386 
+ušt32_t
  
-	mbody
-[256];
-
-299 } 
-	tMW244BPack‘
+	mEv’tId
 ;
 
-302 
-	mev’tTy³
-;
-
-303 
-MW244BPack‘
- *
-	mev’tD‘až
-;
-
-304 
-Sockaddr
+387 
+ušt32_t
  
-	mev’tSourû
+	msourûId
 ;
 
-305 } 
-	tMWEv’t
+388 
+absÞu‹Info
+ 
+	mabsoInfo
 ;
 
-307 *
-m®loc
-();
+389 
+ev’tS³cificD©a
+ 
+	mev’tD©a
+;
 
-308 
-Sockaddr
- *
-»sÞveHo¡
-();
+392 
+	sev’tACK
+{
 
-311 
+393 
+ušt32_t
+ 
+	mev’tId
+;
+
+394 
+ušt32_t
+ 
+	msourûId
+;
+
+395 
+ušt32_t
+ 
+	mde¡š©iÚId
+;
+
+396 
+absÞu‹Info
+ 
+	mabsoInfo
+;
+
+397 
+uncomm™‹dAùiÚ
+ 
+	muncomm™
+[
+MAX_UNCOMMITED
+];
+
+400 
+	sSIACK
+{
+
+401 
+ušt32_t
+ 
+	msourûId
+;
+
+402 
+ušt32_t
+ 
+	mde¡š©iÚId
+;
+
+406 
+h—¹b—t
+ 
+	mhb_
+;
+
+407 
+h—¹b—tACK
+ 
+	mhbACK_
+;
+
+408 
+ev’t
+ 
+	mev_
+;
+
+409 
+ev’tACK
+ 
+	mevACK_
+;
+
+410 
+SIReq
+ 
+	mSIReq_
+;
+
+411 
+SIRes
+ 
+	mSIRes_
+;
+
+412 
+SIACK
+ 
+	mSIACK_
+;
+
+414 } 
+	t·ck‘Info
+;
+
+418 
 In™Di¥Ïy
 (, **);
 
-312 
+419 
 S¹Di¥Ïy
 ();
 
-313 
+420 
 ShowV›w
 (
 Loc
@@ -20563,13 +20971,13 @@ Loc
 DœeùiÚ
 );
 
-314 
+421 
 S‘MyR©IndexTy³
 (
 R©IndexTy³
 );
 
-315 
+422 
 S‘R©Pos™iÚ
 (
 R©IndexTy³
@@ -20579,13 +20987,13 @@ Loc
 DœeùiÚ
 );
 
-316 
+423 
 CË¬R©Pos™iÚ
 (
 R©IndexTy³
 );
 
-317 
+424 
 ShowPos™iÚ
 (
 Loc
@@ -20593,11 +21001,11 @@ Loc
 DœeùiÚ
 );
 
-318 
+425 
 ShowAÎPos™iÚs
 ();
 
-319 
+426 
 showMe
 (
 Loc
@@ -20605,7 +21013,7 @@ Loc
 DœeùiÚ
 );
 
-320 
+427 
 þ—rPos™iÚ
 (
 R©IndexTy³
@@ -20613,7 +21021,7 @@ R©IndexTy³
 Loc
 , Loc);
 
-321 
+428 
 þ—rSqu¬e
 (
 Loc
@@ -20623,21 +21031,21 @@ xCË¬
 yCË¬
 );
 
-322 
+429 
 NewScÜeC¬d
 ();
 
-323 
+430 
 Upd©eScÜeC¬d
 (
 R©IndexTy³
 );
 
-324 
+431 
 FlB™m­s
 ();
 
-325 
+432 
 b™Fl
 (
 B™C–l
@@ -20645,11 +21053,11 @@ B™C–l
 size
 );
 
-326 
+433 
 Sw­B™m­s
 ();
 
-327 
+434 
 by‹Sw­
 (
 B™C–l
@@ -20657,115 +21065,115 @@ B™C–l
 size
 );
 
-330 
+437 
 MazeIn™
 (, **);
 
-331 
+438 
 ¿tS‹s
 ();
 
-332 
+439 
 g‘Maze
 ();
 
-333 
+440 
 £tRªdom
 ();
 
-334 
+441 
 g‘Name
 (*, **);
 
-335 
+442 
 g‘SŒšg
 (*, **);
 
-336 
+443 
 g‘Ho¡Name
 (*, **, 
 Sockaddr
  *);
 
-337 
+444 
 Sockaddr
  *
 »sÞveHo¡
 (*);
 
-338 
+445 
 boÞ
  
 em±yAh—d
 ();
 
-339 
+446 
 boÞ
  
 em±yRight
 ();
 
-340 
+447 
 boÞ
  
 em±yLeá
 ();
 
-341 
+448 
 boÞ
  
 em±yBehšd
 ();
 
-344 
+451 
 ¶ay
 ();
 
-345 
+452 
 aboutFaû
 ();
 
-346 
+453 
 ËáTuº
 ();
 
-347 
+454 
 rightTuº
 ();
 
-348 
+455 
 fÜw¬d
 ();
 
-349 
+456 
 backw¬d
 ();
 
-350 
+457 
 ³ekLeá
 ();
 
-351 
+458 
 ³ekRight
 ();
 
-352 
+459 
 ³ekStÝ
 ();
 
-353 
+460 
 shoÙ
 ();
 
-354 
+461 
 þßk
 ();
 
-355 
+462 
 qu™
 ();
 
-356 
+463 
 NewPos™iÚ
 (
 Mazew¬In¡ªû
@@ -20775,11 +21183,11 @@ PŒ
 M
 );
 
-357 
+464 
 MWE¼Ü
 (*);
 
-358 
+465 
 ScÜe
  
 G‘R©ScÜe
@@ -20787,93 +21195,93 @@ G‘R©ScÜe
 R©IndexTy³
 );
 
-359 *
+466 *
 G‘R©Name
 (
 R©IndexTy³
 );
 
-360 
+467 
 CÚv”tIncomšg
 (
 MW244BPack‘
  *);
 
-361 
+468 
 CÚv”tOutgošg
 (
 MW244BPack‘
  *);
 
-362 
+469 
 ¿tS‹
 ();
 
-363 
+470 
 mªageMissžes
 ();
 
-364 
+471 
 DoV›wUpd©e
 ();
 
-365 
+472 
 £ndPack‘ToPÏy”
 (
 R©Id
 );
 
-366 
+473 
 ´oûssPack‘
 (
 MWEv’t
  *);
 
-367 
+474 
 ÃtIn™
 ();
 
-370 
+477 
 In™Wšdow
 (, **);
 
-371 
+478 
 S¹Wšdow
 (, );
 
-372 
+479 
 CË¬V›w
 ();
 
-373 
+480 
 D¿wV›wLše
 (, , , );
 
-374 
+481 
 NextEv’t
 (
 MWEv’t
  *, );
 
-375 
+482 
 boÞ
  
 KBEv’tP’dšg
 ();
 
-376 
+483 
 HourGÏssCursÜ
 ();
 
-377 
+484 
 R©CursÜ
 ();
 
-378 
+485 
 D—dR©CursÜ
 ();
 
-379 
+486 
 HackMazeB™m­
 (
 Loc
@@ -20881,39 +21289,39 @@ Loc
 B™C–l
  *);
 
-380 
+487 
 Di¥ÏyR©B™m­
 (, , , , , );
 
-381 
+488 
 Wr™eScÜeSŒšg
 (
 R©IndexTy³
 );
 
-382 
+489 
 CË¬ScÜeLše
 (
 R©IndexTy³
 );
 
-383 
+490 
 Inv”tScÜeLše
 (
 R©IndexTy³
 );
 
-384 
+491 
 NÙifyPÏy”
 ();
 
-385 
+492 
 D¿wSŒšg
 (cÚ¡ *, 
 ušt32_t
 , uint32_t, uint32_t);
 
-386 
+493 
 StÝWšdow
 ();
 
@@ -21080,30 +21488,42 @@ M
 );
 
 47 
+	`JošGame
+();
+
+48 
 	`¶ay
 ();
 
-50 
+51 
 	}
 }
 
 54 
+	$JošGame
+(){
+
+56 
+	}
+}
+
+59 
 	$¶ay
 () {
 
-55 
+60 
 MWEv’t
  
 ev’t
 ;
 
-56 
+61 
 MW244BPack‘
  
 šcomšg
 ;
 
-58 
+63 
 ev’t
 .
 ev’tD‘až
@@ -21111,11 +21531,11 @@ ev’tD‘až
 šcomšg
 ;
 
-60 
+65 
 TRUE
 ) {
 
-61 
+66 
 	`NextEv’t
 (&
 ev’t
@@ -21125,153 +21545,153 @@ M
 	`theSock‘
 ());
 
-62 ià(!
+67 ià(!
 M
 ->
 	`³ekšg
 ())
 
-63 
+68 
 ev’t
 .
 ev’tTy³
 ) {
 
-64 
+69 
 EVENT_A
 :
 
-65 
+70 
 	`aboutFaû
 ();
 
-68 
+73 
 EVENT_S
 :
 
-69 
+74 
 	`ËáTuº
 ();
 
-72 
+77 
 EVENT_D
 :
 
-73 
+78 
 	`fÜw¬d
 ();
 
-76 
+81 
 EVENT_F
 :
 
-77 
+82 
 	`rightTuº
 ();
 
-80 
+85 
 EVENT_G
 :
 
-81 
+86 
 	`backw¬d
 ();
 
-84 
+89 
 EVENT_C
 :
 
-85 
+90 
 	`þßk
 ();
 
-88 
+93 
 EVENT_BAR
 :
 
-89 
+94 
 	`shoÙ
 ();
 
-92 
+97 
 EVENT_LEFT_D
 :
 
-93 
+98 
 	`³ekLeá
 ();
 
-96 
+101 
 EVENT_RIGHT_D
 :
 
-97 
+102 
 	`³ekRight
 ();
 
-100 
+105 
 EVENT_NETWORK
 :
 
-101 
+106 
 	`´oûssPack‘
 (&
 ev’t
 );
 
-104 
+109 
 EVENT_INT
 :
 
-105 
+110 
 	`qu™
 (0);
 
-109 
+114 
 ev’t
 .
 ev’tTy³
 ) {
 
-110 
+115 
 EVENT_RIGHT_U
 :
 
-111 
+116 
 EVENT_LEFT_U
 :
 
-112 
+117 
 	`³ekStÝ
 ();
 
-115 
+120 
 EVENT_NETWORK
 :
 
-116 
+121 
 	`´oûssPack‘
 (&
 ev’t
 );
 
-120 
+125 
 	`¿tS‹s
 ();
 
-122 
+127 
 	`mªageMissžes
 ();
 
-124 
+129 
 	`DoV›wUpd©e
 ();
 
-128 
+133 
 	}
 }
 
-132 
+137 
 DœeùiÚ
  
 	g_aboutFaû
@@ -21287,7 +21707,7 @@ WEST
 EAST
 };
 
-133 
+138 
 DœeùiÚ
  
 	g_ËáTuº
@@ -21303,7 +21723,7 @@ NORTH
 SOUTH
 };
 
-134 
+139 
 DœeùiÚ
  
 	g_rightTuº
@@ -21319,11 +21739,11 @@ SOUTH
 NORTH
 };
 
-136 
+141 
 	$aboutFaû
 () {
 
-137 
+142 
 M
 ->
 	`dœIs
@@ -21333,21 +21753,21 @@ _aboutFaû
 MY_DIR
 ]);
 
-138 
+143 
 upd©eV›w
  = 
 TRUE
 ;
 
-139 
+144 
 	}
 }
 
-143 
+148 
 	$ËáTuº
 () {
 
-144 
+149 
 M
 ->
 	`dœIs
@@ -21357,21 +21777,21 @@ _ËáTuº
 MY_DIR
 ]);
 
-145 
+150 
 upd©eV›w
  = 
 TRUE
 ;
 
-146 
+151 
 	}
 }
 
-150 
+155 
 	$rightTuº
 () {
 
-151 
+156 
 M
 ->
 	`dœIs
@@ -21381,41 +21801,41 @@ _rightTuº
 MY_DIR
 ]);
 
-152 
+157 
 upd©eV›w
  = 
 TRUE
 ;
 
-153 
+158 
 	}
 }
 
-159 
+164 
 	$fÜw¬d
 () {
 
-160 
+165 
 tx
  = 
 MY_X_LOC
 ;
 
-161 
+166 
 ty
  = 
 MY_Y_LOC
 ;
 
-163 
+168 
 MY_DIR
 ) {
 
-164 
+169 
 NORTH
 :
 
-165 ià(!
+170 ià(!
 M
 ->
 maze_
@@ -21425,15 +21845,15 @@ tx
 ty
 ])
 
-166 
+171 
 tx
 ++;
 
-168 
+173 
 SOUTH
 :
 
-169 ià(!
+174 ià(!
 M
 ->
 maze_
@@ -21443,15 +21863,15 @@ tx
 ty
 ])
 
-170 
+175 
 tx
 --;
 
-172 
+177 
 EAST
 :
 
-173 ià(!
+178 ià(!
 M
 ->
 maze_
@@ -21461,15 +21881,15 @@ tx
 ty
  + 1])
 
-174 
+179 
 ty
 ++;
 
-176 
+181 
 WEST
 :
 
-177 ià(!
+182 ià(!
 M
 ->
 maze_
@@ -21479,15 +21899,15 @@ tx
 ty
  - 1])
 
-178 
+183 
 ty
 --;
 
-181 
+186 
 	`MWE¼Ü
 ("bad direction in Forward");
 
-183 ià((
+188 ià((
 MY_X_LOC
  !ð
 tx
@@ -21497,7 +21917,7 @@ MY_Y_LOC
 ty
 )) {
 
-184 
+189 
 M
 ->
 	`xlocIs
@@ -21507,7 +21927,7 @@ M
 tx
 ));
 
-185 
+190 
 M
 ->
 	`ylocIs
@@ -21517,41 +21937,41 @@ M
 ty
 ));
 
-186 
+191 
 upd©eV›w
  = 
 TRUE
 ;
 
-188 
+193 
 	}
 }
 
-192 
+197 
 	$backw¬d
 () {
 
-193 
+198 
 tx
  = 
 MY_X_LOC
 ;
 
-194 
+199 
 ty
  = 
 MY_Y_LOC
 ;
 
-196 
+201 
 MY_DIR
 ) {
 
-197 
+202 
 NORTH
 :
 
-198 ià(!
+203 ià(!
 M
 ->
 maze_
@@ -21561,15 +21981,15 @@ tx
 ty
 ])
 
-199 
+204 
 tx
 --;
 
-201 
+206 
 SOUTH
 :
 
-202 ià(!
+207 ià(!
 M
 ->
 maze_
@@ -21579,15 +21999,15 @@ tx
 ty
 ])
 
-203 
+208 
 tx
 ++;
 
-205 
+210 
 EAST
 :
 
-206 ià(!
+211 ià(!
 M
 ->
 maze_
@@ -21597,15 +22017,15 @@ tx
 ty
  - 1])
 
-207 
+212 
 ty
 --;
 
-209 
+214 
 WEST
 :
 
-210 ià(!
+215 ià(!
 M
 ->
 maze_
@@ -21615,15 +22035,15 @@ tx
 ty
  + 1])
 
-211 
+216 
 ty
 ++;
 
-214 
+219 
 	`MWE¼Ü
 ("bad direction in Backward");
 
-216 ià((
+221 ià((
 MY_X_LOC
  !ð
 tx
@@ -21633,7 +22053,7 @@ MY_Y_LOC
 ty
 )) {
 
-217 
+222 
 M
 ->
 	`xlocIs
@@ -21643,7 +22063,7 @@ M
 tx
 ));
 
-218 
+223 
 M
 ->
 	`ylocIs
@@ -21653,21 +22073,21 @@ M
 ty
 ));
 
-219 
+224 
 upd©eV›w
  = 
 TRUE
 ;
 
-221 
+226 
 	}
 }
 
-225 
+230 
 	$³ekLeá
 () {
 
-226 
+231 
 M
 ->
 	`xP“kIs
@@ -21675,217 +22095,31 @@ M
 MY_X_LOC
 );
 
-227 
+232 
 M
 ->
 	`yP“kIs
 (
 MY_Y_LOC
 );
-
-228 
-M
-->
-	`dœP“kIs
-(
-MY_DIR
-);
-
-230 
-MY_DIR
-) {
-
-231 
-NORTH
-:
-
-232 ià(!
-M
-->
-maze_
-[
-MY_X_LOC
- + 1][
-MY_Y_LOC
-]) {
 
 233 
 M
 ->
-	`xP“kIs
-(
-MY_X_LOC
- + 1);
-
-234 
-M
-->
-	`dœP“kIs
-(
-WEST
-);
-
-238 
-SOUTH
-:
-
-239 ià(!
-M
-->
-maze_
-[
-MY_X_LOC
- - 1][
-MY_Y_LOC
-]) {
-
-240 
-M
-->
-	`xP“kIs
-(
-MY_X_LOC
- - 1);
-
-241 
-M
-->
-	`dœP“kIs
-(
-EAST
-);
-
-245 
-EAST
-:
-
-246 ià(!
-M
-->
-maze_
-[
-MY_X_LOC
-][
-MY_Y_LOC
- + 1]) {
-
-247 
-M
-->
-	`yP“kIs
-(
-MY_Y_LOC
- + 1);
-
-248 
-M
-->
-	`dœP“kIs
-(
-NORTH
-);
-
-252 
-WEST
-:
-
-253 ià(!
-M
-->
-maze_
-[
-MY_X_LOC
-][
-MY_Y_LOC
- - 1]) {
-
-254 
-M
-->
-	`yP“kIs
-(
-MY_Y_LOC
- - 1);
-
-255 
-M
-->
-	`dœP“kIs
-(
-SOUTH
-);
-
-260 
-	`MWE¼Ü
-("bad direction in PeekLeft");
-
-265 ià((
-M
-->
-	`xP“k
-(è!ð
-MY_X_LOC
-è|| (M->
-	`yP“k
-(è!ð
-MY_Y_LOC
-)) {
-
-266 
-M
-->
-	`³ekšgIs
-(
-TRUE
-);
-
-267 
-upd©eV›w
- = 
-TRUE
-;
-
-269 
-	}
-}
-
-273 
-	$³ekRight
-() {
-
-274 
-M
-->
-	`xP“kIs
-(
-MY_X_LOC
-);
-
-275 
-M
-->
-	`yP“kIs
-(
-MY_Y_LOC
-);
-
-276 
-M
-->
 	`dœP“kIs
 (
 MY_DIR
 );
 
-278 
+235 
 MY_DIR
 ) {
 
-279 
+236 
 NORTH
 :
 
-280 ià(!
+237 ià(!
 M
 ->
 maze_
@@ -21895,7 +22129,7 @@ MY_X_LOC
 MY_Y_LOC
 ]) {
 
-281 
+238 
 M
 ->
 	`xP“kIs
@@ -21903,19 +22137,19 @@ M
 MY_X_LOC
  + 1);
 
-282 
+239 
 M
 ->
 	`dœP“kIs
 (
-EAST
+WEST
 );
 
-286 
+243 
 SOUTH
 :
 
-287 ià(!
+244 ià(!
 M
 ->
 maze_
@@ -21925,7 +22159,7 @@ MY_X_LOC
 MY_Y_LOC
 ]) {
 
-288 
+245 
 M
 ->
 	`xP“kIs
@@ -21933,19 +22167,19 @@ M
 MY_X_LOC
  - 1);
 
-289 
+246 
 M
 ->
 	`dœP“kIs
 (
-WEST
+EAST
 );
 
-293 
+250 
 EAST
 :
 
-294 ià(!
+251 ià(!
 M
 ->
 maze_
@@ -21955,7 +22189,7 @@ MY_X_LOC
 MY_Y_LOC
  + 1]) {
 
-295 
+252 
 M
 ->
 	`yP“kIs
@@ -21963,19 +22197,19 @@ M
 MY_Y_LOC
  + 1);
 
-296 
+253 
 M
 ->
 	`dœP“kIs
 (
-SOUTH
+NORTH
 );
 
-300 
+257 
 WEST
 :
 
-301 ià(!
+258 ià(!
 M
 ->
 maze_
@@ -21985,7 +22219,7 @@ MY_X_LOC
 MY_Y_LOC
  - 1]) {
 
-302 
+259 
 M
 ->
 	`yP“kIs
@@ -21993,19 +22227,19 @@ M
 MY_Y_LOC
  - 1);
 
-303 
+260 
 M
 ->
 	`dœP“kIs
 (
-NORTH
+SOUTH
 );
 
-308 
+265 
 	`MWE¼Ü
-("bad direction in PeekRight");
+("bad direction in PeekLeft");
 
-313 ià((
+270 ià((
 M
 ->
 	`xP“k
@@ -22017,7 +22251,7 @@ MY_X_LOC
 MY_Y_LOC
 )) {
 
-314 
+271 
 M
 ->
 	`³ekšgIs
@@ -22025,21 +22259,207 @@ M
 TRUE
 );
 
-315 
+272 
 upd©eV›w
  = 
 TRUE
 ;
 
-317 
+274 
 	}
 }
 
-321 
+278 
+	$³ekRight
+() {
+
+279 
+M
+->
+	`xP“kIs
+(
+MY_X_LOC
+);
+
+280 
+M
+->
+	`yP“kIs
+(
+MY_Y_LOC
+);
+
+281 
+M
+->
+	`dœP“kIs
+(
+MY_DIR
+);
+
+283 
+MY_DIR
+) {
+
+284 
+NORTH
+:
+
+285 ià(!
+M
+->
+maze_
+[
+MY_X_LOC
+ + 1][
+MY_Y_LOC
+]) {
+
+286 
+M
+->
+	`xP“kIs
+(
+MY_X_LOC
+ + 1);
+
+287 
+M
+->
+	`dœP“kIs
+(
+EAST
+);
+
+291 
+SOUTH
+:
+
+292 ià(!
+M
+->
+maze_
+[
+MY_X_LOC
+ - 1][
+MY_Y_LOC
+]) {
+
+293 
+M
+->
+	`xP“kIs
+(
+MY_X_LOC
+ - 1);
+
+294 
+M
+->
+	`dœP“kIs
+(
+WEST
+);
+
+298 
+EAST
+:
+
+299 ià(!
+M
+->
+maze_
+[
+MY_X_LOC
+][
+MY_Y_LOC
+ + 1]) {
+
+300 
+M
+->
+	`yP“kIs
+(
+MY_Y_LOC
+ + 1);
+
+301 
+M
+->
+	`dœP“kIs
+(
+SOUTH
+);
+
+305 
+WEST
+:
+
+306 ià(!
+M
+->
+maze_
+[
+MY_X_LOC
+][
+MY_Y_LOC
+ - 1]) {
+
+307 
+M
+->
+	`yP“kIs
+(
+MY_Y_LOC
+ - 1);
+
+308 
+M
+->
+	`dœP“kIs
+(
+NORTH
+);
+
+313 
+	`MWE¼Ü
+("bad direction in PeekRight");
+
+318 ià((
+M
+->
+	`xP“k
+(è!ð
+MY_X_LOC
+è|| (M->
+	`yP“k
+(è!ð
+MY_Y_LOC
+)) {
+
+319 
+M
+->
+	`³ekšgIs
+(
+TRUE
+);
+
+320 
+upd©eV›w
+ = 
+TRUE
+;
+
+322 
+	}
+}
+
+326 
 	$³ekStÝ
 () {
 
-322 
+327 
 M
 ->
 	`³ekšgIs
@@ -22047,55 +22467,55 @@ M
 FALSE
 );
 
-323 
+328 
 upd©eV›w
  = 
 TRUE
 ;
 
-324 
+329 
 	}
 }
 
-328 
+333 
 	$shoÙ
 () {
 
-331 
+336 
 	}
 }
 
-335 
+340 
 	$þßk
 () {
 
-336 
+341 
 	`´štf
 ("Implement cloak()\n");
 
-337 
+342 
 	}
 }
 
-346 
+351 
 	$qu™
 (
 sig
 ) {
 
-348 
+353 
 	`StÝWšdow
 ();
 
-349 
+354 
 	`ex™
 (0);
 
-350 
+355 
 	}
 }
 
-354 
+359 
 	$NewPos™iÚ
 (
 Mazew¬In¡ªû
@@ -22105,25 +22525,25 @@ PŒ
 m
 ) {
 
-355 
+360 
 Loc
  
 	`ÃwX
 (0);
 
-356 
+361 
 Loc
  
 	`ÃwY
 (0);
 
-357 
+362 
 DœeùiÚ
  
 	`dœ
 (0);
 
-359 
+364 
 M
 ->
 maze_
@@ -22135,7 +22555,7 @@ maze_
 ÃwY
 .value()]) {
 
-361 
+366 
 ÃwX
  = 
 	`Loc
@@ -22145,7 +22565,7 @@ maze_
 MAZEXMAX
  - 1));
 
-362 
+367 
 ÃwY
  = 
 	`Loc
@@ -22155,7 +22575,7 @@ MAZEXMAX
 MAZEYMAX
  - 1));
 
-370 ià(!
+375 ià(!
 m
 ->
 maze_
@@ -22167,7 +22587,7 @@ maze_
 ÃwY
 .value())])
 
-371 
+376 
 dœ
  = 
 	`DœeùiÚ
@@ -22175,7 +22595,7 @@ dœ
 NORTH
 );
 
-372 ià(!
+377 ià(!
 m
 ->
 maze_
@@ -22187,7 +22607,7 @@ maze_
 ÃwY
 .value())])
 
-373 
+378 
 dœ
  = 
 	`DœeùiÚ
@@ -22195,7 +22615,7 @@ dœ
 SOUTH
 );
 
-374 ià(!
+379 ià(!
 m
 ->
 maze_
@@ -22207,7 +22627,7 @@ maze_
 ÃwY
 .value()) + 1])
 
-375 
+380 
 dœ
  = 
 	`DœeùiÚ
@@ -22215,7 +22635,7 @@ dœ
 EAST
 );
 
-376 ià(!
+381 ià(!
 m
 ->
 maze_
@@ -22227,7 +22647,7 @@ maze_
 ÃwY
 .value()) - 1])
 
-377 
+382 
 dœ
  = 
 	`DœeùiÚ
@@ -22235,7 +22655,7 @@ dœ
 WEST
 );
 
-379 
+384 
 m
 ->
 	`xlocIs
@@ -22243,7 +22663,7 @@ m
 ÃwX
 );
 
-380 
+385 
 m
 ->
 	`ylocIs
@@ -22251,7 +22671,7 @@ m
 ÃwY
 );
 
-381 
+386 
 m
 ->
 	`dœIs
@@ -22259,21 +22679,21 @@ m
 dœ
 );
 
-382 
+387 
 	}
 }
 
-386 
+391 
 	$MWE¼Ü
 (*
 s
 )
 
-389 
+394 
 	`StÝWšdow
 ();
 
-390 
+395 
 	`årštf
 (
 ¡d”r
@@ -22281,57 +22701,29 @@ s
 s
 );
 
-391 
+396 
 	`³¼Ü
 ("CS244BMazeWar");
 
-392 
+397 
 	`ex™
 (-1);
 
-393 
+398 
 	}
 }
 
-398 
+403 
 ScÜe
  
 	$G‘R©ScÜe
 (
 R©IndexTy³
  
-¿tId
-) {
-
-399 ià(
-¿tId
-.
-	`v®ue
-(è=ð
-M
-->
-	`myR©Id
-().value()) {
-
-400  (
-M
-->
-	`scÜe
-());
-
-404 
-	}
-}
-
-409 *
-	$G‘R©Name
-(
-R©IndexTy³
- 
 ¿tIndex
 ) {
 
-410 ià(
+404 ià(
 ¿tIndex
 .
 	`v®ue
@@ -22341,13 +22733,51 @@ M
 	`myIndex
 ().value()) {
 
-411  (
+405  (
+M
+->
+	`scÜe
+());
+
+407  
+M
+->
+	`¿t
+(
+¿tIndex
+).
+scÜe
+;
+
+409 
+	}
+}
+
+414 *
+	$G‘R©Name
+(
+R©IndexTy³
+ 
+¿tIndex
+) {
+
+415 ià(
+¿tIndex
+.
+	`v®ue
+(è=ð
+M
+->
+	`myIndex
+().value()) {
+
+416  (
 M
 ->
 myName_
 );
 
-413  
+418  
 M
 ->
 	`¿t
@@ -22357,11 +22787,11 @@ M
 Name
 ;
 
-416 
+421 
 	}
 }
 
-421 
+426 
 	$CÚv”tIncomšg
 (
 MW244BPack‘
@@ -22371,7 +22801,7 @@ p
 	}
 }
 
-426 
+431 
 	$CÚv”tOutgošg
 (
 MW244BPack‘
@@ -22381,31 +22811,31 @@ p
 	}
 }
 
-431 
+436 
 	$¿tS‹s
 () {
 
-434 
+439 
 	}
 }
 
-439 
+444 
 	$mªageMissžes
 () {
 
-447 
+452 
 	}
 }
 
-451 
+456 
 	$DoV›wUpd©e
 () {
 
-452 ià(
+457 ià(
 upd©eV›w
 ) {
 
-453 
+458 
 	`ShowPos™iÚ
 (
 MY_X_LOC
@@ -22415,13 +22845,13 @@ MY_Y_LOC
 MY_DIR
 );
 
-454 ià(
+459 ià(
 M
 ->
 	`³ekšg
 ())
 
-455 
+460 
 	`ShowV›w
 (
 M
@@ -22433,7 +22863,7 @@ M
 	`dœP“k
 ());
 
-457 
+462 
 	`ShowV›w
 (
 MY_X_LOC
@@ -22443,29 +22873,39 @@ MY_Y_LOC
 MY_DIR
 );
 
-458 
+463 
 upd©eV›w
  = 
 FALSE
 ;
 
-460 
+465 
 	}
 }
 
-473 
+478 
 	$£ndPack‘ToPÏy”
 (
 R©Id
  
 ¿tId
+, 
+Sockaddr
+ 
+Addr
+, 
+·ckTy³
+, 
+·ck‘Info
+ 
+šfo
 ) {
 
-491 
+496 
 	}
 }
 
-497 
+502 
 	$´oûssPack‘
 (
 MWEv’t
@@ -22473,47 +22913,81 @@ MWEv’t
 ev’tPack‘
 ) {
 
-509 
+525 
+ev’tPack‘
+->
+ev’tTy³
+) {
+
+526 
+HEARTBEAT
+:
+
+528 
+HEARTBEATACK
+:
+
+530 
+EVENT
+:
+
+532 
+EVENTACK
+:
+
+534 
+SIREQ
+:
+
+536 
+SIRES
+:
+
+538 
+SIACK
+:
+
+542 
 	}
 }
 
-517 
+550 
 	$ÃtIn™
 () {
 
-518 
+551 
 Sockaddr
  
 nuÎAddr
 ;
 
-519 
+552 
 Sockaddr
  *
 thisHo¡
 ;
 
-520 
+553 
 buf
 [128];
 
-521 
+554 
 »u£
 ;
 
-522 
+555 
 u_ch¬
  
 ‰l
 ;
 
-523 
+556 
 _m»q
  
 m»q
 ;
 
-526 
+559 
 M
 ->
 	`mazePÜtIs
@@ -22523,13 +22997,13 @@ M
 MAZEPORT
 ));
 
-528 
+561 
 	`g‘ho¡Çme
 (
 buf
 , (buf));
 
-529 ià((
+562 ià((
 thisHo¡
  = 
 	`»sÞveHo¡
@@ -22541,11 +23015,11 @@ Sockaddr
 NULL
 )
 
-530 
+563 
 	`MWE¼Ü
 ("who‡m I?");
 
-531 
+564 
 	`bcÝy
 ((
 ÿddr_t
@@ -22559,7 +23033,7 @@ M
 Sockaddr
 ));
 
-533 
+566 
 M
 ->
 	`theSock‘Is
@@ -22571,21 +23045,21 @@ AF_INET
 SOCK_DGRAM
 , 0));
 
-534 ià(
+567 ià(
 M
 ->
 	`theSock‘
 () < 0)
 
-535 
+568 
 	`MWE¼Ü
 ("can't get socket");
 
-540 
+573 
 »u£
  = 1;
 
-541 ià(
+574 ià(
 	`£tsockÝt
 (
 M
@@ -22599,15 +23073,15 @@ SO_REUSEADDR
 »u£
 ,
 
-542 (
+575 (
 »u£
 )) < 0) {
 
-543 
+576 
 	`MWE¼Ü
 ("setsockopt failed (SO_REUSEADDR)");
 
-546 
+579 
 nuÎAddr
 .
 sš_çmžy
@@ -22615,7 +23089,7 @@ sš_çmžy
 AF_INET
 ;
 
-547 
+580 
 nuÎAddr
 .
 sš_addr
@@ -22627,7 +23101,7 @@ s_addr
 INADDR_ANY
 );
 
-548 
+581 
 nuÎAddr
 .
 sš_pÜt
@@ -22637,7 +23111,7 @@ M
 	`mazePÜt
 ();
 
-549 ià(
+582 ià(
 	`bšd
 (
 M
@@ -22649,15 +23123,15 @@ sockaddr
 nuÎAddr
 , (nullAddr)) < 0)
 
-550 
+583 
 	`MWE¼Ü
 ("netInit binding");
 
-564 
+597 
 ‰l
  = 1;
 
-565 ià(
+598 ià(
 	`£tsockÝt
 (
 M
@@ -22671,15 +23145,15 @@ IP_MULTICAST_TTL
 ‰l
 ,
 
-566 (
+599 (
 ‰l
 )) < 0) {
 
-567 
+600 
 	`MWE¼Ü
 ("setsockopt failed (IP_MULTICAST_TTL)");
 
-571 
+604 
 m»q
 .
 imr_muÉŸddr
@@ -22691,7 +23165,7 @@ s_addr
 MAZEGROUP
 );
 
-572 
+605 
 m»q
 .
 imr_š‹rçû
@@ -22703,7 +23177,7 @@ s_addr
 INADDR_ANY
 );
 
-573 ià(
+606 ià(
 	`£tsockÝt
 (
 M
@@ -22717,19 +23191,19 @@ IP_ADD_MEMBERSHIP
 m»q
 ,
 
-574 (
+607 (
 m»q
 )) < 0) {
 
-575 
+608 
 	`MWE¼Ü
 ("setsockopt failed (IP_ADD_MEMBERSHIP)");
 
-582 
+615 
 	`´štf
 ("\n");
 
-585 
+618 
 M
 ->
 	`myR©IdIs
@@ -22743,17 +23217,17 @@ sš_addr
 s_addr
 ));
 
-586 
+619 
 M
 ->
 	`scÜeIs
 (0);
 
-587 
+620 
 	`S‘MyR©IndexTy³
 (0);
 
-588 
+621 
 M
 ->
 AÎR©s
@@ -22765,7 +23239,7 @@ AÎR©s
 	`myR©Id
 ()});
 
-592 
+625 
 	`memýy
 (&
 groupAddr
@@ -22775,7 +23249,7 @@ nuÎAddr
 Sockaddr
 ));
 
-593 
+626 
 groupAddr
 .
 sš_addr
@@ -22787,7 +23261,7 @@ s_addr
 MAZEGROUP
 );
 
-594 
+627 
 	}
 }
 

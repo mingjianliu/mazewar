@@ -44,13 +44,18 @@ int main(int argc, char *argv[]) {
   one rat in the single player mode Mazewar.
   It doesn't move, you can't shoot it, you can just walk around it */
 
+	JoinGame();
   play();
 
   return 0;
 }
 
 /* ----------------------------------------------------------------------- */
+void JoinGame(){
+  
+}
 
+/* ----------------------------------------------------------------------- */
 void play(void) {
   MWEvent event;
   MW244BPacket incoming;
@@ -470,7 +475,7 @@ void DoViewUpdate() {
  * before any call to sendto.
  */
 
-void sendPacketToPlayer(RatId ratId) {
+void sendPacketToPlayer(RatId ratId, Sockaddr Addr, short packType, packetInfo info) {
   /*
           MW244BPacket pack;
           DataStructureX *packX;
@@ -517,7 +522,23 @@ void processPacket(MWEvent *eventPacket) {
 	 * case State Inquiry ACK:					Clear relevant State Inquiry Response resend
 	 */
 
-		
+				/*
+	switch (eventPacket->eventType) {
+					case HEARTBEAT:
+
+					case HEARTBEATACK:
+
+					case EVENT:
+
+					case EVENTACK:
+
+					case STATEREQUEST:
+
+					case STATERESPONSE:
+
+					case STATEACK:				
+	}		
+		*/
 
 }
 
