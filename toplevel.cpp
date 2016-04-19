@@ -506,6 +506,19 @@ void processPacket(MWEvent *eventPacket) {
           case ...
           }
   */
+
+  /*
+	 * case Heartbeat: 									Send Heartbeat ACK
+	 * case Heartbeat ACK: 							Clear relevant Heartbeat resend
+	 * case Event: 											Save the action into next time slot to process, send Event ACK
+	 * case Event ACK: 									Clear relevant Event resend
+	 * case State Inquiry Request: 			Send State Inquiry Response
+	 * case State Inquiry Response:			Clear relevant State Inquiry Request resend, send State Inquiry ACK 
+	 * case State Inquiry ACK:					Clear relevant State Inquiry Response resend
+	 */
+
+		
+
 }
 
 /* ----------------------------------------------------------------------- */

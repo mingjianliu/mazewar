@@ -92,6 +92,7 @@ SOFTWARE.
 #define SIREQ 4
 #define SIRES 5
 #define SIACK 6
+#define MAX_MISSILES 4
 
 using namespace std;
 
@@ -107,6 +108,7 @@ typedef struct { XYpoint p1, p2; } XYpair;
 typedef struct { short xcor, ycor; } XY;
 typedef struct { unsigned short bits[16]; } BitCell;
 typedef char RatName[NAMESIZE];
+
 
 class Direction : public Ordinal<Direction, short> {
 public:
@@ -170,14 +172,18 @@ struct Missile{
 class Rat {
 
 public:
-  Rat() : playing(0), cloaked(0), x(1), y(1), score(0), dir(NORTH){};
+  Rat() : playing(0), cloaked(0), x(1), y(1), score(0), dir(NORTH){
+		for(int i=0; i < MAX_MISSILES; i++){
+				this->RatMissile[i] = *new Missile();
+		}	
+	};
 	RatName Name;
   bool playing;
   bool cloaked;
   Loc x, y;
   Direction dir;
 	Score score;
-	Missile RatMissile[4];
+	Missile* RatMissile[MAX_MISSILES];
 };
 
 typedef RatAppearance RatApp_type[MAX_RATS];
@@ -185,6 +191,46 @@ typedef RatAppearance *RatLook;
 
 
 
+
+
+
+/* events */
+
+#define EVENT_A 1   /* user pressed "A" */
+#define EVENT_S 2   /* user pressed "S" */
+#define EVENT_F 3   /* user pressed "F" */
+#define EVENT_D 4   /* user pressed "D" */
+#define EVENT_G 5   /* user pressed "G" */
+#define EVENT_C 6   /* user pressed "C" */
+#define EVENT_BAR 7 /* user pressed space bar */
+
+#define EVENT_LEFT_D 30   /* user pressed left mouse button */
+#define EVENT_RIGHT_D 31  /* user pressed right button */
+#define EVENT_MIDDLE_D 32 /* user pressed middle button */
+#define EVENT_LEFT_U 33   /* user released l.M.b */
+#define EVENT_RIGHT_U 34  /* user released r.M.b */
+
+#define EVENT_NETWORK 50 /* incoming network packet */
+#define EVENT_INT 51     /* user pressed interrupt key */
+#define EVENT_TIMEOUT 52 /* nothing happened! */
+
+extern unsigned short ratBits[];
+/* replace this with appropriate definition of your own */
+typedef struct {
+  unsigned char type;
+  u_long body[256];
+} MW244BPacket;
+
+typedef struct {
+  short eventType;
+  MW244BPacket *eventDetail; /* for incoming data */
+  Sockaddr eventSource;
+} MWEvent;
+
+typedef map<RatId, MW244BPacket> ActionSlot;
+
+void *malloc();
+Sockaddr *resolveHost();
 
 /* defined in display.c */
 extern RatApp_type Rats2Display;
@@ -237,6 +283,9 @@ public:
   RatName myName_;
 	//Used to map Index with their ID
 	std::map<RatIndexType, RatId> AllRats;
+	//Store actions to be processed in next two time slots
+	ActionSlot currentSlot;
+  ActionSlot nextSlot;
 
 protected:
   MazewarInstance(string s)
@@ -272,41 +321,6 @@ extern MazewarInstance::Ptr M;
 #define MY_X_LOC M->xloc().value()
 #define MY_Y_LOC M->yloc().value()
 
-/* events */
-
-#define EVENT_A 1   /* user pressed "A" */
-#define EVENT_S 2   /* user pressed "S" */
-#define EVENT_F 3   /* user pressed "F" */
-#define EVENT_D 4   /* user pressed "D" */
-#define EVENT_G 5   /* user pressed "G" */
-#define EVENT_C 6   /* user pressed "C" */
-#define EVENT_BAR 7 /* user pressed space bar */
-
-#define EVENT_LEFT_D 30   /* user pressed left mouse button */
-#define EVENT_RIGHT_D 31  /* user pressed right button */
-#define EVENT_MIDDLE_D 32 /* user pressed middle button */
-#define EVENT_LEFT_U 33   /* user released l.M.b */
-#define EVENT_RIGHT_U 34  /* user released r.M.b */
-
-#define EVENT_NETWORK 50 /* incoming network packet */
-#define EVENT_INT 51     /* user pressed interrupt key */
-#define EVENT_TIMEOUT 52 /* nothing happened! */
-
-extern unsigned short ratBits[];
-/* replace this with appropriate definition of your own */
-typedef struct {
-  unsigned char type;
-  u_long body[256];
-} MW244BPacket;
-
-typedef struct {
-  short eventType;
-  MW244BPacket *eventDetail; /* for incoming data */
-  Sockaddr eventSource;
-} MWEvent;
-
-void *malloc();
-Sockaddr *resolveHost();
 
 /* display.c */
 void InitDisplay(int, char **);
