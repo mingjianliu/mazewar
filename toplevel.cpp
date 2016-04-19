@@ -325,11 +325,17 @@ void peekStop() {
 
 /* ----------------------------------------------------------------------- */
 
-void shoot() { printf("Implement shoot()\n"); }
+void shoot() { 
+
+
+}
 
 /* ----------------------------------------------------------------------- */
 
-void cloak() { printf("Implement cloak()\n"); }
+void cloak() { 
+				printf("Implement cloak()\n");
+}
+
 
 /* ----------------------------------------------------------------------- */
 
@@ -400,12 +406,13 @@ Score GetRatScore(RatIndexType ratId) {
 /* ----------------------------------------------------------------------- */
 
 /* This is just for the sample version, rewrite your own */
-char *GetRatName(RatIndexType ratId) {
-  if (ratId.value() == M->myRatId().value()) {
-    return (M->myName_);
-  } else {
-    return ("Dummy");
-  }
+char *GetRatName(RatIndexType ratIndex) {
+				if (ratIndex.value() == M->myIndex().value()) {
+								return (M->myName_);
+				} else {
+								return M->rat(ratIndex).Name;		
+				}				
+				return ("Dummy");
 }
 
 /* ----------------------------------------------------------------------- */
@@ -575,7 +582,8 @@ void netInit() {
   printf("\n");
 
   /* set up some stuff strictly for this local sample */
-  M->myRatIdIs(M->theSocket());
+  M->myRatIdIs(htonl(thisHost->sin_addr.s_addr));
+  
   M->scoreIs(0);
   SetMyRatIndexType(0);
 

@@ -171,6 +171,7 @@ class Rat {
 
 public:
   Rat() : playing(0), cloaked(0), x(1), y(1), dir(NORTH){};
+	RatName Name;
   bool playing;
   bool cloaked;
   Loc x, y;
@@ -226,17 +227,34 @@ public:
   void yPeekIs(Loc yPeek) { this->yPeek_ = yPeek; }
   inline int active() const { return active_; }
   void activeIs(int active) { this->active_ = active; }
-  inline Rat rat(RatIndexType num) const { return mazeRats_[num.value()]; }
-  void ratIs(Rat rat, RatIndexType num) { this->mazeRats_[num.value()] = rat; }
+	inline Rat rat(RatIndexType num) const { return mazeRats_[num.value()]; }
+	//				inline Rat rat(RatIndexType num) const { 
+	//									auto iter = AllRats.find(num);
+	//									if (iter != AllRats.end())
+	//													return iter->second;
+	//									else 
+	//													throw "Look for RatId doesn't exist!";
+	//					}
+	void ratIs(Rat rat, RatIndexType num) { this->mazeRats_[num.value()] = rat; }
+	//void ratIs(Rat rat, RatIndexType num) {
+	//					auto iter = AllRats.find(num);
+	//					if (iter != AllRats.end())
+	//									iter->second = rat;
+	//					else 
+	//								  AllRats.insert({num, rat});	
+	//	}
+	inline RatIndexType myIndex() const { return this->myRatIndex_;}
+	void myIndexIs(RatIndexType index){ this->myRatIndex_ = index;}
 
   MazeType maze_;
   RatName myName_;
-	std::map<RatId, Rat> OtherRats;
+	//Used to map Index with their ID
+	std::map<RatIndexType, RatId> AllRats;
 
 protected:
   MazewarInstance(string s)
       : Fwk::NamedInterface(s), dir_(0), dirPeek_(0), myRatId_(0), score_(0),
-        xloc_(1), yloc_(3), xPeek_(0), yPeek_(0) {
+        xloc_(1), yloc_(3), xPeek_(0), yPeek_(0), myRatIndex_(0) {
     myAddr_ = (Sockaddr *)malloc(sizeof(Sockaddr));
     if (!myAddr_) {
       printf("Error allocating sockaddr variable");
@@ -249,6 +267,7 @@ protected:
   Sockaddr *myAddr_;
   Rat mazeRats_[MAX_RATS];
   RatId myRatId_;
+  RatIndexType myRatIndex_;
 
   bool peeking_;
   int theSocket_;
