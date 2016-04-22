@@ -325,6 +325,13 @@ extern MazewarInstance::Ptr M;
 #define MY_Y_LOC M->yloc().value()
 
 /* Protocol packet information*/
+union parsedInfo{
+  bool 1bit;
+  uint8_t 8bits;
+  uint16_t 16bits;
+  uint32_t 32bits;
+}
+
 struct heartbeat{
   uint32_t heartbeatId;
   uint32_t sourceId;
