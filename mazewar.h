@@ -379,7 +379,7 @@ struct absoluteInfo{
 	uint8_t direction;
 	bool cloak;
 	uint8_t missileNumber;
-	missileInfo missiles[4];
+	missileInfo missiles[MAX_MISSILES];
 };
 
 struct event{
@@ -389,8 +389,6 @@ struct event{
   absoluteInfo absoInfo;
 	eventSpecificData eventData;
 };
-
-
 
 struct eventACK{
   uint32_t eventId;

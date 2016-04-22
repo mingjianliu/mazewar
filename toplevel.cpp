@@ -475,7 +475,55 @@ void DoViewUpdate() {
  * before any call to sendto.
  */
 
-void sendPacketToPlayer(RatId ratId, Sockaddr Addr, short packType, packetInfo info) {
+void copybit(uint32_t *temp, uint32_t src, uint8_t offset, uint8_t length) {
+				if(length > 32 || offset < 0 || length + offset > 32){
+								printf("Set packet bits error\n");
+				}
+				if(length != 32) {
+								uint32_t mask = (1 << length) - 1;
+								src &= mask;
+								src = src << offset;
+				}
+				*temp |= src;
+				return;
+}	
+
+void encodeEventData(uint32_t* temp1, uint32_t* temp2, uint8_t type, eventSpecificData eventData) {
+
+				switch(type) {
+								//event cloak
+								case 0:
+												copybit(temp1, eventData.cloak, 31, 1);
+
+								//event movement
+								case 1:
+												copybit(temp1, eventData.moveData.direction, 30, 2);
+												copybit(temp1, eventData.moveData.speed, 28, 2);
+
+								//event born
+								case 2:
+												copybit(temp1, eventData.bornData.position, 23, 9);
+												copybit(temp1, eventData.bornData.direction, 21, 2);
+
+								//event missile projection
+								case 3:
+												copybit(temp1, eventData.missileProjData.missileId, 30, 2);
+												copybit(temp1, eventData.missileProjData.position, 21, 9);
+												copybit(temp1, eventData.missileProjData.direction, 19, 2);
+
+								//event missile hit
+								case 4:
+												copybit(temp1, eventData.missileHitData.ownerId, 0, 32);
+												copybit(temp2, eventData.missileHitData.missileId, 30, 2);
+												copybit(temp2, eventData.missileHitData.position, 21, 9);
+												copybit(temp2, eventData.missileHitData.direction, 19, 2);
+				}
+				return;
+
+
+}
+
+void sendPacketToPlayer(RatId ratId, Sockaddr Addr, unsigned char packType, packetInfo info) {
   /*
           MW244BPacket pack;
           DataStructureX *packX;
@@ -493,6 +541,110 @@ void sendPacketToPlayer(RatId ratId, Sockaddr Addr, short packType, packetInfo i
                      (Sockaddr) destSocket, sizeof(Sockaddr)) < 0)
             { MWError("Sample error") };
   */
+
+	MW244BPacket pack;
+  pack.type = packType;
+	uint32_t temp = 0;
+  switch(packType){
+					/* draft version, need to write a function like copybit(uint32_t temp, uint32_t src, uint8_t offset, uint8_t length) */
+					/* need to change temp in copybit into an pointer */
+					case HEARTBEAT:
+								memcpy(pack.body, &info.hb_.heartbeatId, 4);
+								memcpy(pack.body+4, &info.hb_.sourceId, 4);
+					case HEARTBEATACK:
+								memcpy(pack.body, info.hbACK_.heartbeatId, 4);
+								memcpy(pack.body+4, info.hbACK_.sourceId, 4);
+								memcpy(pack.body+8, info.hbACK_.destinationId, 4);
+					case EVENT:
+								memset(temp, 0, 4);
+                copybit(&temp, info.ev_.type, 28, 4);	
+								copybit(&temp, info.ev_.EventId, 0, 28);
+								memcpy(pack.body, temp, 4);
+								memcpy(pack.body+4, info.ev_.sourceId, 4);
+								memcpy(pack.body+8, info.ev_.absoInfo.score, 4);
+								memset(temp, 0, 4);
+								copybit(&temp, info.ev_.absoInfo.position, 23, 9);
+								copybit(&temp, info.ev_.absoInfo.direction, 21, 2);
+								copybit(&temp, info.ev_.absoInfo.cloak, 20, 1);
+								copybit(&temp, info.ev_.absoInfo.missileNumber, 18, 2);
+								memcpy(pack.body+12, temp, 4);
+								int i;
+                for(i=0; i<MAX_MISSILES; i+=2){
+								  memset(temp, 0, 4);
+									copybit(&temp, info.ev_.absoInfo.missiles[i].missileId, 30, 2);
+									copybit(&temp, info.ev_.absoInfo.missiles[i].missileId, 21, 9);
+									copybit(&temp, info.ev_.absoInfo.missiles[i].missileId, 19, 2);
+								  if(i+1 < MAX_MISSILES) {
+													memset(temp, 0, 4);
+													copybit(&temp, info.ev_.absoInfo.missiles[i+1].missileId, 14, 2);
+													copybit(&temp, info.ev_.absoInfo.missiles[i+1].missileId, 5, 9);
+													copybit(&temp, info.ev_.absoInfo.missiles[i+1].missileId, 3, 2);
+									}
+									memcpy(pack.body+16+i/2, temp, 4);
+
+								}	
+								uint32 temp1, temp2;
+								memset(temp1, 0, 4);
+								memset(temp2, 0, 4);
+							  encodeEventData(&temp1, &temp2, info.ev_.type, info.ev_.eventData);	
+								memcpy(pack.body+16+i/2, temp1, 4);
+								memcpy(pack.body+20+i/2, temp2, 4);
+
+					case EVENTACK:
+								memset(temp, 0, 4);
+								copybit(&temp, info.evACK_.eventId, 4, 28);
+								memcpy(pack.body, temp, 4);
+								memcpy(pack.body+4, info.evACK_.sourceId, 4);
+								memcpy(pack.body+8, info.evACK_.destinationId, 4);
+
+					case STATEREQUEST:
+								memcpy(pack.body, info.SIReq_.sourceId, 4);
+
+					case STATERESPONSE:
+								uint32 temp1, temp2;
+                memcpy(pack.body, info.SIRes_.sourceId, 4); 
+                memcpy(pack.body, info.SIRes_.destinationId, 4); 
+								memcpy(pack.body+8, info.SIRes_.absoInfo.score, 4);
+								memset(temp, 0, 4);
+								copybit(&temp, info.SIRes_.absoInfo.position, 23, 9);
+								copybit(&temp, info.SIRes_.absoInfo.direction, 21, 2);
+								copybit(&temp, info.SIRes_.absoInfo.cloak, 20, 1);
+								copybit(&temp, info.SIRes_.absoInfo.missileNumber, 18, 2);
+								memcpy(pack.body+12, temp, 4);
+								int i;
+                for(i=0; i<MAX_MISSILES; i+=2){
+								  memset(temp, 0, 4);
+									copybit(&temp, info.SIRes_.absoInfo.missiles[i].missileId, 30, 2);
+									copybit(&temp, info.SIRes_.absoInfo.missiles[i].missileId, 21, 9);
+									copybit(&temp, info.SIRes_.absoInfo.missiles[i].missileId, 19, 2);
+								  if(i+1 < MAX_MISSILES) {
+													memset(temp, 0, 4);
+													copybit(&temp, info.SIRes_.absoInfo.missiles[i+1].missileId, 14, 2);
+													copybit(&temp, info.SIRes_.absoInfo.missiles[i+1].missileId, 5, 9);
+													copybit(&temp, info.SIRes_.absoInfo.missiles[i+1].missileId, 3, 2);
+									}
+									memcpy(pack.body+16+i/2, temp, 4);
+								}	
+								//each uncommited event has 3 x 32bits, i.e. 12bytes
+								for(int j=0; j<info.SIRes.uncommitted_number; j++){
+											//encoding data
+											memset(temp, 0, 4);
+											copybit(&temp, info.SIRes_.uncommit[j].type, 28, 4);	
+											copybit(&temp, info.SIRes_.uncommit[j].EventId, 0, 28);
+											memset(temp1, 0, 4);
+											memset(temp2, 0, 4);
+							  			encodeEventData(&temp1, &temp2, info.SIRes_.uncommit[j].type, info.SIRes_.uncommit[j].eventData);	
+											//copying data
+											memcpy(pack.body+16+i/2+j*3, temp, 4);
+											memcpy(pack.body+16+i/2+j*3+1, temp1, 4);
+											memcpy(pack.body+16+i/2+j*3+2, temp2, 4);
+								}
+
+					case STATEACK:
+								memcpy(pack.body, info.SIACK_.sourceId 4);
+								memcpy(pack.body+4, info.SIACK_.destinationId, 4);
+
+	}	
 }
 
 /* ----------------------------------------------------------------------- */
