@@ -231,7 +231,7 @@ void InitWindow(int argc, char **argv) {
   printf("set XResource. ");
 
   if (!app_resources.scoreFont)
-    MWError("cannot open font");
+    MWError((char *)"cannot open font");
   scoreFontInfo = XQueryFont(dpy, app_resources.scoreFont);
 
   printf("set XQueue. ");
@@ -479,7 +479,7 @@ void NextEvent(MWEvent *event, int socket) {
         }
         if (ret == -1) {
           if (errno != EINTR)
-            MWError("select error on events");
+            MWError((char *)"select error on events");
         } else if (ret == 0) {
           nexttimeout.tv_sec = app_resources.time_interval / 1000;
           nexttimeout.tv_usec = 1000 * (app_resources.time_interval % 1000);
@@ -497,7 +497,7 @@ void NextEvent(MWEvent *event, int socket) {
       timeout.tv_usec = 0;
       while ((ret = select(32, &fdmask, NULL, NULL, &timeout)) == -1)
         if (errno != EINTR)
-          MWError("select error on events");
+          MWError((char *)"select error on events");
     }
     if (XPending(dpy)) {
       XNextEvent(dpy, &xev);
@@ -831,7 +831,7 @@ static void initMaze() {
 
   if (mazeImage == 0)
 #endif /* USE_BITMAPS */
-    MWError("Can't create maze Pixmap");
+    MWError((char *)"Can't create maze Pixmap");
 }
 
 /* ----------------------------------------------------------------------- */
@@ -868,7 +868,7 @@ static void initRats(int width, int height) {
 
   if (ratsImage == 0)
 #endif /* USE_BITMAPS */
-    MWError("Can't create rats");
+    MWError((char *)"Can't create rats");
 }
 
 /* ----------------------------------------------------------------------- */

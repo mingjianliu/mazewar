@@ -159,7 +159,7 @@ void getName(char *prompt, char **ratName) {
   }
   *ratName = (char *)malloc((unsigned)(strlen(buf) + 1));
   if (*ratName == NULL)
-    MWError("no mem for ratName");
+    MWError((char *)"no mem for ratName");
   strcpy(*ratName, buf);
 }
 
@@ -172,7 +172,7 @@ void getString(char *prompt, char **string) {
   fgets(buf, sizeof(buf) - 1, stdin);
   *string = (char *)malloc((unsigned)(strlen(buf) + 1));
   if (*string == NULL)
-    MWError("no mem for getString");
+    MWError((char *)"no mem for getString");
   strcpy(*string, buf);
 }
 
@@ -191,7 +191,7 @@ void getHostName(char *prompt, char **hostName, Sockaddr *hostAddr) {
       break;
     *hostName = (char *)malloc((unsigned)(strlen(buf) + 1));
     if (*hostName == NULL)
-      MWError("no mem for hostName");
+      MWError((char *)"no mem for hostName");
     strcpy(*hostName, buf);
 
     /* check for valid maze name */

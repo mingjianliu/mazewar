@@ -183,7 +183,7 @@ void forward(void) {
       ty--;
     break;
   default:
-    MWError("bad direction in Forward");
+    MWError((char *)"bad direction in Forward");
   }
   if ((MY_X_LOC != tx) || (MY_Y_LOC != ty)) {
     M->xlocIs(Loc(tx));
@@ -216,7 +216,7 @@ void backward() {
       ty++;
     break;
   default:
-    MWError("bad direction in Backward");
+    MWError((char *)"bad direction in Backward");
   }
   if ((MY_X_LOC != tx) || (MY_Y_LOC != ty)) {
     M->xlocIs(Loc(tx));
@@ -262,7 +262,7 @@ void peekLeft() {
     break;
 
   default:
-    MWError("bad direction in PeekLeft");
+    MWError((char *)"bad direction in PeekLeft");
   }
 
   /* if any change, display the new view without moving! */
@@ -310,7 +310,7 @@ void peekRight() {
     break;
 
   default:
-    MWError("bad direction in PeekRight");
+    MWError((char *)"bad direction in PeekRight");
   }
 
   /* if any change, display the new view without moving! */
@@ -388,7 +388,7 @@ void NewPosition(MazewarInstance::Ptr m) {
 
 /* ----------------------------------------------------------------------- */
 
-void MWError(char *s)
+void MWError(char s[])
 
 {
   StopWindow();
@@ -548,101 +548,100 @@ void sendPacketToPlayer(RatId ratId, Sockaddr Addr, unsigned char packType, pack
   switch(packType){
 					/* draft version, need to write a function like copybit(uint32_t temp, uint32_t src, uint8_t offset, uint8_t length) */
 					/* need to change temp in copybit into an pointer */
+					int i = 0;
 					case HEARTBEAT:
 								memcpy(pack.body, &info.hb_.heartbeatId, 4);
 								memcpy(pack.body+4, &info.hb_.sourceId, 4);
 					case HEARTBEATACK:
-								memcpy(pack.body, info.hbACK_.heartbeatId, 4);
-								memcpy(pack.body+4, info.hbACK_.sourceId, 4);
-								memcpy(pack.body+8, info.hbACK_.destinationId, 4);
+								memcpy(pack.body, &info.hbACK_.heartbeatId, 4);
+								memcpy(pack.body+4, &info.hbACK_.sourceId, 4);
+								memcpy(pack.body+8, &info.hbACK_.destinationId, 4);
 					case EVENT:
-								memset(temp, 0, 4);
+								memset(&temp, 0, 4);
                 copybit(&temp, info.ev_.type, 28, 4);	
 								copybit(&temp, info.ev_.EventId, 0, 28);
-								memcpy(pack.body, temp, 4);
-								memcpy(pack.body+4, info.ev_.sourceId, 4);
-								memcpy(pack.body+8, info.ev_.absoInfo.score, 4);
-								memset(temp, 0, 4);
+								memcpy(pack.body, &temp, 4);
+								memcpy(pack.body+4, &info.ev_.sourceId, 4);
+								memcpy(pack.body+8, &info.ev_.absoInfo.score, 4);
+								memset(&temp, 0, 4);
 								copybit(&temp, info.ev_.absoInfo.position, 23, 9);
 								copybit(&temp, info.ev_.absoInfo.direction, 21, 2);
 								copybit(&temp, info.ev_.absoInfo.cloak, 20, 1);
 								copybit(&temp, info.ev_.absoInfo.missileNumber, 18, 2);
-								memcpy(pack.body+12, temp, 4);
-								int i;
+								memcpy(pack.body+12, &temp, 4);
                 for(i=0; i<MAX_MISSILES; i+=2){
-								  memset(temp, 0, 4);
+								  memset(&temp, 0, 4);
 									copybit(&temp, info.ev_.absoInfo.missiles[i].missileId, 30, 2);
 									copybit(&temp, info.ev_.absoInfo.missiles[i].missileId, 21, 9);
 									copybit(&temp, info.ev_.absoInfo.missiles[i].missileId, 19, 2);
 								  if(i+1 < MAX_MISSILES) {
-													memset(temp, 0, 4);
+													memset(&temp, 0, 4);
 													copybit(&temp, info.ev_.absoInfo.missiles[i+1].missileId, 14, 2);
 													copybit(&temp, info.ev_.absoInfo.missiles[i+1].missileId, 5, 9);
 													copybit(&temp, info.ev_.absoInfo.missiles[i+1].missileId, 3, 2);
 									}
-									memcpy(pack.body+16+i/2, temp, 4);
+									memcpy(pack.body+16+i/2, &temp, 4);
 
 								}	
-								uint32 temp1, temp2;
-								memset(temp1, 0, 4);
-								memset(temp2, 0, 4);
+								uint32_t temp1, temp2;
+								memset(&temp1, 0, 4);
+								memset(&temp2, 0, 4);
 							  encodeEventData(&temp1, &temp2, info.ev_.type, info.ev_.eventData);	
-								memcpy(pack.body+16+i/2, temp1, 4);
-								memcpy(pack.body+20+i/2, temp2, 4);
+								memcpy(pack.body+16+i/2, &temp1, 4);
+								memcpy(pack.body+20+i/2, &temp2, 4);
 
 					case EVENTACK:
-								memset(temp, 0, 4);
+								memset(&temp, 0, 4);
 								copybit(&temp, info.evACK_.eventId, 4, 28);
-								memcpy(pack.body, temp, 4);
-								memcpy(pack.body+4, info.evACK_.sourceId, 4);
-								memcpy(pack.body+8, info.evACK_.destinationId, 4);
+								memcpy(pack.body, &temp, 4);
+								memcpy(pack.body+4, &info.evACK_.sourceId, 4);
+								memcpy(pack.body+8, &info.evACK_.destinationId, 4);
 
 					case STATEREQUEST:
-								memcpy(pack.body, info.SIReq_.sourceId, 4);
+								memcpy(pack.body, &info.SIReq_.sourceId, 4);
 
 					case STATERESPONSE:
 								uint32 temp1, temp2;
-                memcpy(pack.body, info.SIRes_.sourceId, 4); 
-                memcpy(pack.body, info.SIRes_.destinationId, 4); 
-								memcpy(pack.body+8, info.SIRes_.absoInfo.score, 4);
-								memset(temp, 0, 4);
+                memcpy(pack.body, &info.SIRes_.sourceId, 4); 
+                memcpy(pack.body, &info.SIRes_.destinationId, 4); 
+								memcpy(pack.body+8, &info.SIRes_.absoInfo.score, 4);
+								memset(&temp, 0, 4);
 								copybit(&temp, info.SIRes_.absoInfo.position, 23, 9);
 								copybit(&temp, info.SIRes_.absoInfo.direction, 21, 2);
 								copybit(&temp, info.SIRes_.absoInfo.cloak, 20, 1);
 								copybit(&temp, info.SIRes_.absoInfo.missileNumber, 18, 2);
-								memcpy(pack.body+12, temp, 4);
-								int i;
+								memcpy(pack.body+12, &temp, 4);
                 for(i=0; i<MAX_MISSILES; i+=2){
-								  memset(temp, 0, 4);
+								  memset(&temp, 0, 4);
 									copybit(&temp, info.SIRes_.absoInfo.missiles[i].missileId, 30, 2);
 									copybit(&temp, info.SIRes_.absoInfo.missiles[i].missileId, 21, 9);
 									copybit(&temp, info.SIRes_.absoInfo.missiles[i].missileId, 19, 2);
 								  if(i+1 < MAX_MISSILES) {
-													memset(temp, 0, 4);
+													memset(&temp, 0, 4);
 													copybit(&temp, info.SIRes_.absoInfo.missiles[i+1].missileId, 14, 2);
 													copybit(&temp, info.SIRes_.absoInfo.missiles[i+1].missileId, 5, 9);
 													copybit(&temp, info.SIRes_.absoInfo.missiles[i+1].missileId, 3, 2);
 									}
-									memcpy(pack.body+16+i/2, temp, 4);
+									memcpy(pack.body+16+i/2, &temp, 4);
 								}	
 								//each uncommited event has 3 x 32bits, i.e. 12bytes
-								for(int j=0; j<info.SIRes.uncommitted_number; j++){
+								for(int j=0; j<info.SIRes_.uncommitted_number; j++){
 											//encoding data
-											memset(temp, 0, 4);
+											memset(&temp, 0, 4);
 											copybit(&temp, info.SIRes_.uncommit[j].type, 28, 4);	
 											copybit(&temp, info.SIRes_.uncommit[j].EventId, 0, 28);
-											memset(temp1, 0, 4);
-											memset(temp2, 0, 4);
+											memset(&temp1, 0, 4);
+											memset(&temp2, 0, 4);
 							  			encodeEventData(&temp1, &temp2, info.SIRes_.uncommit[j].type, info.SIRes_.uncommit[j].eventData);	
 											//copying data
-											memcpy(pack.body+16+i/2+j*3, temp, 4);
-											memcpy(pack.body+16+i/2+j*3+1, temp1, 4);
-											memcpy(pack.body+16+i/2+j*3+2, temp2, 4);
+											memcpy(pack.body+16+i/2+j*3, &temp, 4);
+											memcpy(pack.body+16+i/2+j*3+1, &temp1, 4);
+											memcpy(pack.body+16+i/2+j*3+2, &temp2, 4);
 								}
 
 					case STATEACK:
-								memcpy(pack.body, info.SIACK_.sourceId 4);
-								memcpy(pack.body+4, info.SIACK_.destinationId, 4);
+								memcpy(pack.body, &info.SIACK_.sourceId, 4);
+								memcpy(pack.body+4, &info.SIACK_.destinationId, 4);
 
 	}	
 }
@@ -713,12 +712,12 @@ void netInit() {
 
   gethostname(buf, sizeof(buf));
   if ((thisHost = resolveHost(buf)) == (Sockaddr *)NULL)
-    MWError("who am I?");
+    MWError((char *)"who am I?");
   bcopy((caddr_t)thisHost, (caddr_t)(M->myAddr()), sizeof(Sockaddr));
 
   M->theSocketIs(socket(AF_INET, SOCK_DGRAM, 0));
   if (M->theSocket() < 0)
-    MWError("can't get socket");
+    MWError((char *)"can't get socket");
 
   /* SO_REUSEADDR allows more than one binding to the same
      socket - you cannot have more than one player on one
@@ -726,14 +725,14 @@ void netInit() {
   reuse = 1;
   if (setsockopt(M->theSocket(), SOL_SOCKET, SO_REUSEADDR, &reuse,
                  sizeof(reuse)) < 0) {
-    MWError("setsockopt failed (SO_REUSEADDR)");
+    MWError((char *)"setsockopt failed (SO_REUSEADDR)");
   }
 
   nullAddr.sin_family = AF_INET;
   nullAddr.sin_addr.s_addr = htonl(INADDR_ANY);
   nullAddr.sin_port = M->mazePort();
   if (bind(M->theSocket(), (struct sockaddr *)&nullAddr, sizeof(nullAddr)) < 0)
-    MWError("netInit binding");
+    MWError((char *)"netInit binding");
 
   /* Multicast TTL:
      0 restricted to the same host
@@ -750,7 +749,7 @@ void netInit() {
   ttl = 1;
   if (setsockopt(M->theSocket(), IPPROTO_IP, IP_MULTICAST_TTL, &ttl,
                  sizeof(ttl)) < 0) {
-    MWError("setsockopt failed (IP_MULTICAST_TTL)");
+    MWError((char *)"setsockopt failed (IP_MULTICAST_TTL)");
   }
 
   /* join the multicast group */
@@ -758,7 +757,7 @@ void netInit() {
   mreq.imr_interface.s_addr = htonl(INADDR_ANY);
   if (setsockopt(M->theSocket(), IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&mreq,
                  sizeof(mreq)) < 0) {
-    MWError("setsockopt failed (IP_ADD_MEMBERSHIP)");
+    MWError((char *)"setsockopt failed (IP_ADD_MEMBERSHIP)");
   }
 
   /*
