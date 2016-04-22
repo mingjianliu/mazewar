@@ -326,11 +326,11 @@ extern MazewarInstance::Ptr M;
 
 /* Protocol packet information*/
 union parsedInfo{
-  bool 1bit;
-  uint8_t 8bits;
-  uint16_t 16bits;
-  uint32_t 32bits;
-}
+  bool bit_1;
+  uint8_t bit_8;
+  uint16_t bit_16;
+  uint32_t bit_32;
+};
 
 struct heartbeat{
   uint32_t heartbeatId;
@@ -496,6 +496,15 @@ void DoViewUpdate(void);
 void sendPacketToPlayer(RatId);
 void processPacket(MWEvent *);
 void netInit(void);
+void copybit(uint32_t, uint32_t, uint8_t, uint8_t);
+parsedInfo parsebit(uint32_t, uint8_t, uint8_t);
+absoluteInfo parseAbsoluteInfo(uint8_t*);
+eventSpecificData parseEventData(uint8_t*, uint8_t);
+uncommittedAction parseUncommit(uint8_t*);
+void encodeEventData(uint32_t*, uint32_t*, uint8_t, eventSpecificData);
+void memcpy_helper(void*, void*, std::size_t);
+//packetInfo packetParser(MW244BPacket*);
+
 
 /* winsys.c */
 void InitWindow(int, char **);
