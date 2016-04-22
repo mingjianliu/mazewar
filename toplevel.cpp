@@ -645,6 +645,10 @@ void sendPacketToPlayer(RatId ratId, Sockaddr destSocket, unsigned char packType
 								memcpy(pack.body+5, &info.SIACK_.destinationId, 4);
 
 	}	
+
+  if (sendto((int)M->theSocket(), &pack, sizeof(pack), 0,
+                     (struct sockaddr *)&destSocket, sizeof(Sockaddr)) < 0)
+            MWError((char *)"Sample error");
 }
 
 /* ----------------------------------------------------------------------- */
@@ -673,8 +677,7 @@ void processPacket(MWEvent *eventPacket) {
 	 * case State Inquiry Response:			Clear relevant State Inquiry Request resend, send State Inquiry ACK 
 	 * case State Inquiry ACK:					Clear relevant State Inquiry Response resend
 	 */
-
-				/*
+  /*
 	switch (eventPacket->eventType) {
 					case HEARTBEAT:
 
@@ -689,9 +692,8 @@ void processPacket(MWEvent *eventPacket) {
 					case STATERESPONSE:
 
 					case STATEACK:				
-	}		
-		*/
-
+	}	
+  */
 }
 
 /* ----------------------------------------------------------------------- */
