@@ -410,6 +410,7 @@ struct SIRes{
 	uint32_t sourceId;
 	uint32_t destinationId;
   absoluteInfo absoInfo;
+	int uncommitted_number;
 	uncommittedAction uncommit[MAX_UNCOMMITED];
 };
 

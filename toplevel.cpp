@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
   signal(SIGINT, quit);
   signal(SIGTERM, quit);
 
-  getName("Welcome to CS244B MazeWar!\n\nYour Name", &ratName);
+  getName((char *)"Welcome to CS244B MazeWar!\n\nYour Name", &ratName);
   ratName[strlen(ratName) - 1] = 0;
 
   M = MazewarInstance::mazewarInstanceNew(string(ratName));
@@ -417,7 +417,7 @@ char *GetRatName(RatIndexType ratIndex) {
 				} else {
 								return M->rat(ratIndex).Name;		
 				}				
-				return ("Dummy");
+				return ((char *)"Dummy");
 }
 
 /* ----------------------------------------------------------------------- */
@@ -544,18 +544,21 @@ void sendPacketToPlayer(RatId ratId, Sockaddr Addr, unsigned char packType, pack
 
 	MW244BPacket pack;
   pack.type = packType;
-	uint32_t temp = 0;
+	uint32_t temp;
+  uint32_t temp1, temp2;
+  int count = 0;
   switch(packType){
 					/* draft version, need to write a function like copybit(uint32_t temp, uint32_t src, uint8_t offset, uint8_t length) */
 					/* need to change temp in copybit into an pointer */
-					int i = 0;
 					case HEARTBEAT:
 								memcpy(pack.body, &info.hb_.heartbeatId, 4);
 								memcpy(pack.body+4, &info.hb_.sourceId, 4);
+
 					case HEARTBEATACK:
 								memcpy(pack.body, &info.hbACK_.heartbeatId, 4);
 								memcpy(pack.body+4, &info.hbACK_.sourceId, 4);
 								memcpy(pack.body+8, &info.hbACK_.destinationId, 4);
+                
 					case EVENT:
 								memset(&temp, 0, 4);
                 copybit(&temp, info.ev_.type, 28, 4);	
@@ -569,26 +572,24 @@ void sendPacketToPlayer(RatId ratId, Sockaddr Addr, unsigned char packType, pack
 								copybit(&temp, info.ev_.absoInfo.cloak, 20, 1);
 								copybit(&temp, info.ev_.absoInfo.missileNumber, 18, 2);
 								memcpy(pack.body+12, &temp, 4);
-                for(i=0; i<MAX_MISSILES; i+=2){
+                for(count=0; count<MAX_MISSILES; count+=2){
 								  memset(&temp, 0, 4);
-									copybit(&temp, info.ev_.absoInfo.missiles[i].missileId, 30, 2);
-									copybit(&temp, info.ev_.absoInfo.missiles[i].missileId, 21, 9);
-									copybit(&temp, info.ev_.absoInfo.missiles[i].missileId, 19, 2);
-								  if(i+1 < MAX_MISSILES) {
+									copybit(&temp, info.ev_.absoInfo.missiles[count].missileId, 30, 2);
+									copybit(&temp, info.ev_.absoInfo.missiles[count].missileId, 21, 9);
+									copybit(&temp, info.ev_.absoInfo.missiles[count].missileId, 19, 2);
+								  if(count+1 < MAX_MISSILES) {
 													memset(&temp, 0, 4);
-													copybit(&temp, info.ev_.absoInfo.missiles[i+1].missileId, 14, 2);
-													copybit(&temp, info.ev_.absoInfo.missiles[i+1].missileId, 5, 9);
-													copybit(&temp, info.ev_.absoInfo.missiles[i+1].missileId, 3, 2);
+													copybit(&temp, info.ev_.absoInfo.missiles[count+1].missileId, 14, 2);
+													copybit(&temp, info.ev_.absoInfo.missiles[count+1].missileId, 5, 9);
+													copybit(&temp, info.ev_.absoInfo.missiles[count+1].missileId, 3, 2);
 									}
-									memcpy(pack.body+16+i/2, &temp, 4);
-
+									memcpy(pack.body+16+count/2, &temp, 4);
 								}	
-								uint32_t temp1, temp2;
 								memset(&temp1, 0, 4);
 								memset(&temp2, 0, 4);
 							  encodeEventData(&temp1, &temp2, info.ev_.type, info.ev_.eventData);	
-								memcpy(pack.body+16+i/2, &temp1, 4);
-								memcpy(pack.body+20+i/2, &temp2, 4);
+								memcpy(pack.body+16+count/2, &temp1, 4);
+								memcpy(pack.body+20+count/2, &temp2, 4);
 
 					case EVENTACK:
 								memset(&temp, 0, 4);
@@ -601,7 +602,6 @@ void sendPacketToPlayer(RatId ratId, Sockaddr Addr, unsigned char packType, pack
 								memcpy(pack.body, &info.SIReq_.sourceId, 4);
 
 					case STATERESPONSE:
-								uint32 temp1, temp2;
                 memcpy(pack.body, &info.SIRes_.sourceId, 4); 
                 memcpy(pack.body, &info.SIRes_.destinationId, 4); 
 								memcpy(pack.body+8, &info.SIRes_.absoInfo.score, 4);
@@ -611,18 +611,18 @@ void sendPacketToPlayer(RatId ratId, Sockaddr Addr, unsigned char packType, pack
 								copybit(&temp, info.SIRes_.absoInfo.cloak, 20, 1);
 								copybit(&temp, info.SIRes_.absoInfo.missileNumber, 18, 2);
 								memcpy(pack.body+12, &temp, 4);
-                for(i=0; i<MAX_MISSILES; i+=2){
+                for(count=0; count<MAX_MISSILES; count+=2){
 								  memset(&temp, 0, 4);
-									copybit(&temp, info.SIRes_.absoInfo.missiles[i].missileId, 30, 2);
-									copybit(&temp, info.SIRes_.absoInfo.missiles[i].missileId, 21, 9);
-									copybit(&temp, info.SIRes_.absoInfo.missiles[i].missileId, 19, 2);
-								  if(i+1 < MAX_MISSILES) {
+									copybit(&temp, info.SIRes_.absoInfo.missiles[count].missileId, 30, 2);
+									copybit(&temp, info.SIRes_.absoInfo.missiles[count].missileId, 21, 9);
+									copybit(&temp, info.SIRes_.absoInfo.missiles[count].missileId, 19, 2);
+								  if(count+1 < MAX_MISSILES) {
 													memset(&temp, 0, 4);
-													copybit(&temp, info.SIRes_.absoInfo.missiles[i+1].missileId, 14, 2);
-													copybit(&temp, info.SIRes_.absoInfo.missiles[i+1].missileId, 5, 9);
-													copybit(&temp, info.SIRes_.absoInfo.missiles[i+1].missileId, 3, 2);
+													copybit(&temp, info.SIRes_.absoInfo.missiles[count+1].missileId, 14, 2);
+													copybit(&temp, info.SIRes_.absoInfo.missiles[count+1].missileId, 5, 9);
+													copybit(&temp, info.SIRes_.absoInfo.missiles[count+1].missileId, 3, 2);
 									}
-									memcpy(pack.body+16+i/2, &temp, 4);
+									memcpy(pack.body+16+count/2, &temp, 4);
 								}	
 								//each uncommited event has 3 x 32bits, i.e. 12bytes
 								for(int j=0; j<info.SIRes_.uncommitted_number; j++){
@@ -634,9 +634,9 @@ void sendPacketToPlayer(RatId ratId, Sockaddr Addr, unsigned char packType, pack
 											memset(&temp2, 0, 4);
 							  			encodeEventData(&temp1, &temp2, info.SIRes_.uncommit[j].type, info.SIRes_.uncommit[j].eventData);	
 											//copying data
-											memcpy(pack.body+16+i/2+j*3, &temp, 4);
-											memcpy(pack.body+16+i/2+j*3+1, &temp1, 4);
-											memcpy(pack.body+16+i/2+j*3+2, &temp2, 4);
+											memcpy(pack.body+16+count/2+j*3, &temp, 4);
+											memcpy(pack.body+16+count/2+j*3+1, &temp1, 4);
+											memcpy(pack.body+16+count/2+j*3+2, &temp2, 4);
 								}
 
 					case STATEACK:
