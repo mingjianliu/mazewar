@@ -23,7 +23,7 @@ MazewarInstance::Ptr M;
 static Sockaddr groupAddr;
 #define MAX_OTHER_RATS (MAX_RATS - 1)
 
-int main(int argc, char *argv[]) {
+int main1(int argc, char *argv[]) {
   Loc x(1);
   Loc y(5);
   Direction dir(0);
@@ -53,6 +53,20 @@ int main(int argc, char *argv[]) {
   play();
 
   return 0;
+}
+
+void setHeartbeat(packetInfo info){
+  info.hb_.heartbeatId = 1;
+  info.hb_.sourceId = 0x7f010101;
+}
+
+
+int main(int argc, char *argv[]) {
+  packetInfo testInfo;
+  setHeartbeat(testInfo);
+
+  MW244BPacket pack = sendPacketToPlayer(testinfo);
+  printf("%lu\n",pack->body);
 }
 
 /* ----------------------------------------------------------------------- */
@@ -612,7 +626,7 @@ void memcpy_helper(void* destination, void* source, std::size_t count){
           return;
 }
 
-void sendPacketToPlayer(RatId ratId, Sockaddr destSocket, unsigned char packType, packetInfo info) {
+pack sendPacketToPlayer(Sockaddr destSocket, unsigned char packType, packetInfo info) {
   /*
           MW244BPacket pack;
           DataStructureX *packX;
@@ -724,10 +738,11 @@ void sendPacketToPlayer(RatId ratId, Sockaddr destSocket, unsigned char packType
 								memcpy_helper(address, &info.SIACK_.destinationId, 4);
 
 	}	
-
-  if (sendto((int)M->theSocket(), &pack, sizeof(pack), 0,
+  return pack;
+  /*if (sendto((int)M->theSocket(), &pack, sizeof(pack), 0,
                      (struct sockaddr *)&destSocket, sizeof(Sockaddr)) < 0)
             MWError((char *)"Sample error");
+            */
 }
 
 packetInfo packetParser(MW244BPacket* pack) {
