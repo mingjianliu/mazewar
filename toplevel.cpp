@@ -765,8 +765,8 @@ packetInfo packetParser(MW244BPacket* pack) {
               info.ev_.type = parsebit(temp, 28, 4).bit_8;
               info.ev_.EventId = parsebit(temp, 0, 28).bit_32;
               memcpy(&info.ev_.sourceId, pack->body+4, 4);
-              info.ev_.absoInfo = parseAbsoluteInfo(pack->body +8);
-              info.ev_.eventData = parseEventData(pack->body+16+MAX_MISSILES*2, info.ev_.type);
+              info.ev_.absoInfo = parseAbsoluteInfo((uint8_t*)pack->body +8);
+              info.ev_.eventData = parseEventData((uint8_t*)pack->body+16+MAX_MISSILES*2, info.ev_.type);
 
           case EVENTACK:
               memset(&temp, 0, 4);
@@ -781,10 +781,11 @@ packetInfo packetParser(MW244BPacket* pack) {
           case STATERESPONSE:
               memcpy(&info.SIRes_.sourceId, pack->body, 4);
               memcpy(&info.SIRes_.destinationId, pack->body+4, 4);
-              info.SIRes_.absoInfo = parseAbsoluteInfo(pack->body+8);
-              info.SIRes_.uncommitted_number = parsebit(pack->body+16+MAX_MISSILES*2).bit_32;
+              info.SIRes_.absoInfo = parseAbsoluteInfo((uint8_t*)pack->body+8);
+              memcpy(&info.SIRes_.uncommitted_number, pack->body+16+MAX_MISSILES*2, 4);
+              //info.SIRes_.uncommitted_number = parsebit((uint32_t*)(pack->body+16+MAX_MISSILES*2), 0, 32).bit_32;
               for(int j=0; j<info.SIRes_.uncommitted_number; ++j){
-                info.SIRes_.uncommit[j] = parseUncommit(pack->body+20+MAX_MISSILES*2);
+                info.SIRes_.uncommit[j] = parseUncommit((uint8_t*)pack->body+20+MAX_MISSILES*2);
               }
            
           case STATEACK:        
