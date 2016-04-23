@@ -55,18 +55,82 @@ int main1(int argc, char *argv[]) {
   return 0;
 }
 
-void setHeartbeat(packetInfo info){
-  info.hb_.heartbeatId = 1;
-  info.hb_.sourceId = 0x7f010101;
+void print_test(uint64_t n){
+  int count = 0;
+  while (n) {
+      if (n & 1)
+          printf("1");
+      else
+          printf("0");
+  
+      n >>= 1;
+      count++;
+      if(count%8==0)
+        printf("\t");
+  }
+  printf("\n");
 }
 
+packetInfo setHeartbeat(packetInfo info){
+  info.hb_.heartbeatId = 1;
+  info.hb_.sourceId = 0x7f010100;
+  print_test(info.hb_.heartbeatId);
+  print_test(info.hb_.sourceId);
+  return info;
+}
+
+packetInfo setHeartbeatACK(packetInfo info){
+  info.hbACK_.heartbeatId = 1;
+  info.hbACK_.sourceId = 0x7f010100;
+  info.hbACK_.destinationId = 0xffffffff;
+  return info;
+}
+
+absoluteInfo setAbsoluInfo(){
+  absoluteInfo info;
+  info.score = 0xeeeeeeee;
+  info.position = 1022;
+  info.direction = 1;
+  info.cloak = 0;
+  info.missileNumber = 2;
+  info.missiles[0].missileId = 3;
+  info.missiles[0].position = 1023;
+  info.missiles[0].direction = 3;
+  info.missiles[3].missileId = 3;
+  info.missiles[3].position = 1023;
+  info.missiles[3].direction = 3;
+  return info;
+}
+
+eventSpecificData setEventInfo(){
+  eventSpecificData info;
+  info.missileHitData.ownerId = 0xdddddddd;
+  info.missileHitData.missileId = 3;
+  info.missileHitData.position = 511;
+  info.missileHitData.direction = 2;
+  return info;
+}
+
+packetInfo setEvent(packetInfo info){
+  info.ev_.type = 15;
+  info.ev_.EventId = 1;
+  info.ev_.sourceId = 0x7f010100;
+  info.ev_.absoInfo = setAbsoluInfo();
+  info.ev_.eventData = setEventInfo();
+  return info;
+}
 
 int main(int argc, char *argv[]) {
   packetInfo testInfo;
-  setHeartbeat(testInfo);
-
-  MW244BPacket pack = sendPacketToPlayer(testinfo);
-  printf("%lu\n",pack->body);
+  //testInfo = setHeartbeat(testInfo);
+  //testInfo = setHeartbeatACK(testInfo);
+  testInfo = setEvent(testInfo);
+  MW244BPacket pack = sendPacketToPlayer(EVENT, testInfo);
+  print_test(pack.body[0]);
+  print_test(pack.body[1]); 
+  print_test(pack.body[2]);
+  print_test(pack.body[3]); 
+   
 }
 
 /* ----------------------------------------------------------------------- */
@@ -593,22 +657,26 @@ void encodeEventData(uint32_t* temp1, uint32_t* temp2, uint8_t type, eventSpecif
 								//event cloak
 								case 0:
 												copybit(temp1, eventData.cloak, 31, 1);
+                        break;
 
 								//event movement
 								case 1:
 												copybit(temp1, eventData.moveData.direction, 30, 2);
 												copybit(temp1, eventData.moveData.speed, 28, 2);
+                        break;
 
 								//event born
 								case 2:
 												copybit(temp1, eventData.bornData.position, 23, 9);
 												copybit(temp1, eventData.bornData.direction, 21, 2);
+                        break;
 
 								//event missile projection
 								case 3:
 												copybit(temp1, eventData.missileProjData.missileId, 30, 2);
 												copybit(temp1, eventData.missileProjData.position, 21, 9);
 												copybit(temp1, eventData.missileProjData.direction, 19, 2);
+                        break;
 
 								//event missile hit
 								case 4:
@@ -616,17 +684,20 @@ void encodeEventData(uint32_t* temp1, uint32_t* temp2, uint8_t type, eventSpecif
 												copybit(temp2, eventData.missileHitData.missileId, 30, 2);
 												copybit(temp2, eventData.missileHitData.position, 21, 9);
 												copybit(temp2, eventData.missileHitData.direction, 19, 2);
+                        break;
 				}
 				return;
 }
 
-void memcpy_helper(void* destination, void* source, std::size_t count){
-          memcpy(destination, source, count);
-          destination = static_cast<char*>(destination) + count;
+void memcpy_helper(void* destination, void* source, std::size_t count, std::size_t* offset){
+          memset((uint8_t*)destination+*offset, 0, count);
+          memcpy((uint8_t*)destination+*offset, source, count);
+          //destination = (void*)(static_cast<char*>(destination) + count);
+          *offset += count;
           return;
 }
 
-pack sendPacketToPlayer(Sockaddr destSocket, unsigned char packType, packetInfo info) {
+MW244BPacket sendPacketToPlayer(unsigned char packType, packetInfo info) {
   /*
           MW244BPacket pack;
           DataStructureX *packX;
@@ -651,72 +722,78 @@ pack sendPacketToPlayer(Sockaddr destSocket, unsigned char packType, packetInfo 
   uint32_t temp1, temp2;
   int count = 0;
   void* address = &pack.body;
+  std::size_t offset = 0;
   switch(packType){
 					/* draft version, need to write a function like copybit(uint32_t temp, uint32_t src, uint8_t offset, uint8_t length) */
 					/* need to change temp in copybit into an pointer */
 					case HEARTBEAT:
-								memcpy_helper(address, &info.hb_.heartbeatId, 4);
-								memcpy_helper(address, &info.hb_.sourceId, 4);
+								memcpy_helper(address, &info.hb_.heartbeatId, 4, &offset);
+								memcpy_helper(address, &info.hb_.sourceId, 4, &offset);
+                break;
 
 					case HEARTBEATACK:
-								memcpy_helper(address, &info.hbACK_.heartbeatId, 4);
-								memcpy_helper(address, &info.hbACK_.sourceId, 4);
-								memcpy_helper(address, &info.hbACK_.destinationId, 4);
+								memcpy_helper(address, &info.hbACK_.heartbeatId, 4, &offset);
+								memcpy_helper(address, &info.hbACK_.sourceId, 4, &offset);
+								memcpy_helper(address, &info.hbACK_.destinationId, 4, &offset);
+                break;
 
 					case EVENT:
 								memset(&temp, 0, 4);
                 copybit(&temp, info.ev_.type, 28, 4);	
 								copybit(&temp, info.ev_.EventId, 0, 28);
-								memcpy_helper(address, &temp, 4);
-								memcpy_helper(address, &info.ev_.sourceId, 4);
-								memcpy_helper(address, &info.ev_.absoInfo.score, 4);
+								memcpy_helper(address, &temp, 4, &offset);
+								memcpy_helper(address, &info.ev_.sourceId, 4, &offset);
+								memcpy_helper(address, &info.ev_.absoInfo.score, 4, &offset);
 								memset(&temp, 0, 4);
 								copybit(&temp, info.ev_.absoInfo.position, 23, 9);
 								copybit(&temp, info.ev_.absoInfo.direction, 21, 2);
 								copybit(&temp, info.ev_.absoInfo.cloak, 20, 1);
 								copybit(&temp, info.ev_.absoInfo.missileNumber, 18, 2);
-								memcpy_helper(address, &temp, 4);
+								memcpy_helper(address, &temp, 4, &offset);
                 for(count=0; count<MAX_MISSILES; ++count){
 								  memset(&temp, 0, 4);
 									copybit(&temp, info.ev_.absoInfo.missiles[count].missileId, 14, 2);
 									copybit(&temp, info.ev_.absoInfo.missiles[count].position, 5, 9);
 									copybit(&temp, info.ev_.absoInfo.missiles[count].direction, 3, 2);
                   uint16_t temp16 = temp;
-									memcpy_helper(address, &temp16, 2);
+									memcpy_helper(address, &temp16, 2, &offset);
 								}	
 								memset(&temp1, 0, 4);
 								memset(&temp2, 0, 4);
 							  encodeEventData(&temp1, &temp2, info.ev_.type, info.ev_.eventData);	
-								memcpy_helper(address, &temp1, 4);
-								memcpy_helper(address, &temp2, 4);
+								memcpy_helper(address, &temp1, 4, &offset);
+								memcpy_helper(address, &temp2, 4, &offset);
+                break;
 
 					case EVENTACK:
 								memset(&temp, 0, 4);
 								copybit(&temp, info.evACK_.eventId, 4, 28);
-								memcpy_helper(address, &temp, 4);
-								memcpy_helper(address, &info.evACK_.sourceId, 4);
-								memcpy_helper(address, &info.evACK_.destinationId, 4);
+								memcpy_helper(address, &temp, 4, &offset);
+								memcpy_helper(address, &info.evACK_.sourceId, 4, &offset);
+								memcpy_helper(address, &info.evACK_.destinationId, 4, &offset);
+                break;
 
 					case STATEREQUEST:
-								memcpy_helper(address, &info.SIReq_.sourceId, 4);
+								memcpy_helper(address, &info.SIReq_.sourceId, 4, &offset);
+                break;
 
 					case STATERESPONSE:
-                memcpy_helper(address, &info.SIRes_.sourceId, 4); 
-                memcpy_helper(address, &info.SIRes_.destinationId, 4); 
-								memcpy_helper(address, &info.SIRes_.absoInfo.score, 4);
+                memcpy_helper(address, &info.SIRes_.sourceId, 4, &offset); 
+                memcpy_helper(address, &info.SIRes_.destinationId, 4, &offset); 
+								memcpy_helper(address, &info.SIRes_.absoInfo.score, 4, &offset);
 								memset(&temp, 0, 4);
 								copybit(&temp, info.SIRes_.absoInfo.position, 23, 9);
 								copybit(&temp, info.SIRes_.absoInfo.direction, 21, 2);
 								copybit(&temp, info.SIRes_.absoInfo.cloak, 20, 1);
 								copybit(&temp, info.SIRes_.absoInfo.missileNumber, 18, 2);
-								memcpy_helper(address, &temp, 4);
+								memcpy_helper(address, &temp, 4, &offset);
                 for(count=0; count<MAX_MISSILES; ++count){
                   memset(&temp, 0, 4);
                   copybit(&temp, info.ev_.absoInfo.missiles[count].missileId, 14, 2);
                   copybit(&temp, info.ev_.absoInfo.missiles[count].position, 5, 9);
                   copybit(&temp, info.ev_.absoInfo.missiles[count].direction, 3, 2);
                   uint16_t temp16 = temp;
-                  memcpy_helper(address, &temp16, 2);
+                  memcpy_helper(address, &temp16, 2, &offset);
                 } 
 								//each uncommited event has 3 x 32bits, i.e. 12bytes
 								for(int j=0; j<info.SIRes_.uncommitted_number; j++){
@@ -728,14 +805,16 @@ pack sendPacketToPlayer(Sockaddr destSocket, unsigned char packType, packetInfo 
 											memset(&temp2, 0, 4);
 							  			encodeEventData(&temp1, &temp2, info.SIRes_.uncommit[j].type, info.SIRes_.uncommit[j].eventData);	
 											//copying data
-											memcpy_helper(address, &temp, 4);
-											memcpy_helper(address, &temp1, 4);
-											memcpy_helper(address, &temp2, 4);
+											memcpy_helper(address, &temp, 4, &offset);
+											memcpy_helper(address, &temp1, 4, &offset);
+											memcpy_helper(address, &temp2, 4, &offset);
 								}
+                break;
 
 					case STATEACK:
-								memcpy_helper(address, &info.SIACK_.sourceId, 4);
-								memcpy_helper(address, &info.SIACK_.destinationId, 4);
+								memcpy_helper(address, &info.SIACK_.sourceId, 4, &offset);
+								memcpy_helper(address, &info.SIACK_.destinationId, 4, &offset);
+                break;
 
 	}	
   return pack;
@@ -753,11 +832,13 @@ packetInfo packetParser(MW244BPacket* pack) {
           case HEARTBEAT:
               memcpy(&info.hb_.heartbeatId, pack->body, 4);
               memcpy(&info.hb_.sourceId, pack->body+4, 4);
+              break;
 
           case HEARTBEATACK:
               memcpy(&info.hbACK_.heartbeatId, pack->body, 4);
               memcpy(&info.hbACK_.sourceId, pack->body+4, 4);
               memcpy(&info.hbACK_.destinationId, pack->body+8, 4);
+              break;
 
           case EVENT:
               memset(&temp, 0, 4);
@@ -767,6 +848,7 @@ packetInfo packetParser(MW244BPacket* pack) {
               memcpy(&info.ev_.sourceId, pack->body+4, 4);
               info.ev_.absoInfo = parseAbsoluteInfo((uint8_t*)pack->body +8);
               info.ev_.eventData = parseEventData((uint8_t*)pack->body+16+MAX_MISSILES*2, info.ev_.type);
+              break;
 
           case EVENTACK:
               memset(&temp, 0, 4);
@@ -774,9 +856,11 @@ packetInfo packetParser(MW244BPacket* pack) {
               info.evACK_.eventId = parsebit(temp, 4, 28).bit_32;
               memcpy(&info.evACK_.sourceId, pack->body+4, 4);
               memcpy(&info.evACK_.destinationId, pack->body+8, 4);
+              break;
      
           case STATEREQUEST:
-              memcpy(&info.SIReq_.sourceId, pack->body, 4);         
+              memcpy(&info.SIReq_.sourceId, pack->body, 4);
+              break;         
            
           case STATERESPONSE:
               memcpy(&info.SIRes_.sourceId, pack->body, 4);
@@ -787,10 +871,12 @@ packetInfo packetParser(MW244BPacket* pack) {
               for(int j=0; j<info.SIRes_.uncommitted_number; ++j){
                 info.SIRes_.uncommit[j] = parseUncommit((uint8_t*)pack->body+20+MAX_MISSILES*2);
               }
+              break;
            
           case STATEACK:        
               memcpy(&info.SIACK_.sourceId, pack->body, 4);
               memcpy(&info.SIACK_.destinationId, pack->body+4, 4); 
+              break;
             
   }
   return info;
