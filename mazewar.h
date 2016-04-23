@@ -417,7 +417,7 @@ struct SIRes{
 	uint32_t sourceId;
 	uint32_t destinationId;
   absoluteInfo absoInfo;
-	int uncommitted_number;
+	uint32_t uncommitted_number;
 	uncommittedAction uncommit[MAX_UNCOMMITED];
 };
 
@@ -493,7 +493,7 @@ void ConvertOutgoing(MW244BPacket *);
 void ratState(void);
 void manageMissiles(void);
 void DoViewUpdate(void);
-MW244BPacket sendPacketToPlayer(unsigned char, packetInfo); 
+MW244BPacket sendPacketToPlayer(unsigned char, packetInfo);
 void processPacket(MWEvent *);
 void netInit(void);
 void copybit(uint32_t, uint32_t, uint8_t, uint8_t);
