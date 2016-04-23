@@ -131,9 +131,9 @@ public:
   }
 };
 
-class Score : public Ordinal<Score, int> {
+class Score : public Ordinal<Score, uint32_t> {
 public:
-  Score(int num) : Ordinal<Score, int>(num) {}
+  Score(int num) : Ordinal<Score, uint32_t>(num) {}
 };
 
 class RatIndexType : public Ordinal<RatIndexType, int> {
@@ -230,8 +230,6 @@ typedef struct {
   Sockaddr eventSource;
 } MWEvent;
 
-typedef map<RatId, MW244BPacket> ActionSlot;
-
 void *malloc();
 Sockaddr *resolveHost();
 
@@ -324,6 +322,11 @@ extern MazewarInstance::Ptr M;
 #define MY_X_LOC M->xloc().value()
 #define MY_Y_LOC M->yloc().value()
 
+typedef Position{
+  uint8_t x;
+  uint8_t y;
+}
+
 /* Protocol packet information*/
 union parsedInfo{
   bool bit_1;
@@ -345,7 +348,7 @@ struct heartbeatACK{
 
 struct missileInfo{
 	uint8_t missileId;
-	uint16_t position;
+	Position position;
 	uint8_t direction;
 };
 
@@ -355,20 +358,20 @@ struct movement{
 };
 
 struct born{
-	uint16_t position;
+	Position position;
 	uint8_t direction;
 };
 
 struct missileProjection{
 	uint8_t missileId;
-	uint16_t position;
+	Position position;
 	uint8_t direction;
 };
 
 struct missileHit{
 	uint32_t ownerId;			
 	uint8_t missileId;
-	uint16_t position;
+	Position position;
 	uint8_t direction;
 };
 
@@ -382,7 +385,7 @@ union eventSpecificData{
 
 struct absoluteInfo{
 	uint32_t score;
-  uint16_t position;
+  Position position;
 	uint8_t direction;
 	bool cloak;
 	uint8_t missileNumber;
@@ -391,14 +394,14 @@ struct absoluteInfo{
 
 struct event{
   uint8_t type;
-	uint32_t EventId;
+	EventId eventId;
   uint32_t sourceId;
   absoluteInfo absoInfo;
 	eventSpecificData eventData;
 };
 
 struct eventACK{
-  uint32_t eventId;
+  EventId eventId;
 	uint32_t sourceId;
 	uint32_t destinationId;
 };
@@ -409,7 +412,7 @@ struct SIReq{
 
 struct uncommittedAction{
   uint8_t type;
-	uint32_t EventId;
+	EventId eventId;
 	eventSpecificData eventData;
 };
 

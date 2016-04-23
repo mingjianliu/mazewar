@@ -520,7 +520,8 @@ absoluteInfo parseAbsoluteInfo(uint8_t* address){
   memcpy(&result.score, address, 4);
   memset(&temp, 0, 4);
   memcpy(&temp, ((uint8_t*)address)+4, 4);
-  result.position = parsebit(temp, 23, 9).bit_16;
+  result.position.x = parsebit(temp, 27, 5).bit_16;
+  result.position.y = parsebit(temp, 23, 4).bit_16;
   result.direction = parsebit(temp, 21, 2).bit_8;
   result.cloak = parsebit(temp, 20, 1).bit_1;
   result.missileNumber = parsebit(temp, 18, 2).bit_8;
@@ -528,7 +529,8 @@ absoluteInfo parseAbsoluteInfo(uint8_t* address){
     memset(&temp16, 0, 2);
     memcpy(&temp16, ((uint8_t*)address)+8+count*2, 2);
     result.missiles[count].missileId = parsebit(temp16, 14, 2).bit_8;
-    result.missiles[count].position = parsebit(temp16, 5, 9).bit_16;
+    result.missiles[count].position.x = parsebit(temp16, 9, 5).bit_16;
+    result.missiles[count].position.y = parsebit(temp16, 5, 4).bit_16;
     result.missiles[count].direction = parsebit(temp16, 3, 2).bit_8;
   }
   return result;
@@ -552,20 +554,23 @@ eventSpecificData parseEventData(uint8_t* address, uint8_t type){
             break;
 
     case 2:
-            result.bornData.position = parsebit(temp1, 23, 9).bit_16;
+            result.bornData.position.x = parsebit(temp1, 27, 5).bit_16;
+            result.bornData.position.y = parsebit(temp1, 23, 4).bit_16;
             result.bornData.direction = parsebit(temp1, 21, 2).bit_8;
             break;
 
     case 3:
             result.missileProjData.missileId = parsebit(temp1, 30, 2).bit_8;
-            result.missileProjData.position = parsebit(temp1, 21, 9).bit_16;
+            result.missileProjData.position.x = parsebit(temp1, 25, 5).bit_16;
+            result.missileProjData.position.y = parsebit(temp1, 21, 4).bit_16;
             result.missileProjData.direction = parsebit(temp1, 19, 2).bit_8;
             break;
 
     case 4:
             result.missileHitData.ownerId = parsebit(temp1, 0, 32).bit_32;
             result.missileHitData.missileId = parsebit(temp2, 30, 2).bit_8;
-            result.missileHitData.position = parsebit(temp2, 21, 9).bit_16;
+            result.missileHitData.position.x = parsebit(temp2, 25, 5).bit_16;
+            result.missileHitData.position.y = parsebit(temp2, 21, 4).bit_16;
             result.missileHitData.direction = parsebit(temp2, 19, 2).bit_8;
             break;
   }
@@ -578,7 +583,7 @@ uncommittedAction parseUncommit(uint8_t* address){
   memset(&temp, 0, 4);
   memcpy(&temp, address, 4);
   result.type = parsebit(temp, 28, 4).bit_8;
-  result.EventId = parsebit(temp, 0, 28).bit_32;
+  result.eventId = parsebit(temp, 0, 28).bit_32;
   result.eventData = parseEventData(address+4, result.type);
   return result;
 }
@@ -599,14 +604,16 @@ void encodeEventData(uint32_t* temp1, uint32_t* temp2, uint8_t type, eventSpecif
 
 								//event born
 								case 2:
-												copybit(temp1, eventData.bornData.position, 23, 9);
+												copybit(temp1, eventData.bornData.position.x, 27, 5);
+                        copybit(temp1, eventData.bornData.position.y, 23, 4);
 												copybit(temp1, eventData.bornData.direction, 21, 2);
                         break;
 
 								//event missile projection
 								case 3:
 												copybit(temp1, eventData.missileProjData.missileId, 30, 2);
-												copybit(temp1, eventData.missileProjData.position, 21, 9);
+												copybit(temp1, eventData.missileProjData.position.x, 25, 5);
+                        copybit(temp1, eventData.missileProjData.position.y, 21, 4);
 												copybit(temp1, eventData.missileProjData.direction, 19, 2);
                         break;
 
@@ -614,7 +621,8 @@ void encodeEventData(uint32_t* temp1, uint32_t* temp2, uint8_t type, eventSpecif
 								case 4:
 												copybit(temp1, eventData.missileHitData.ownerId, 0, 32);
 												copybit(temp2, eventData.missileHitData.missileId, 30, 2);
-												copybit(temp2, eventData.missileHitData.position, 21, 9);
+												copybit(temp2, eventData.missileHitData.position.x, 25, 5);
+                        copybit(temp2, eventData.missileHitData.position.y, 21, 4);
 												copybit(temp2, eventData.missileHitData.direction, 19, 2);
                         break;
 				}
@@ -629,7 +637,7 @@ void memcpy_helper(void* destination, void* source, std::size_t count, std::size
           return;
 }
 
-MW244BPacket sendPacketToPlayer(unsigned char packType, packetInfo info) {
+void sendPacketToPlayer(unsigned char packType, packetInfo info) {
   /*
           MW244BPacket pack;
           DataStructureX *packX;
@@ -672,12 +680,13 @@ MW244BPacket sendPacketToPlayer(unsigned char packType, packetInfo info) {
 					case EVENT:
 								memset(&temp, 0, 4);
                 copybit(&temp, info.ev_.type, 28, 4);	
-								copybit(&temp, info.ev_.EventId, 0, 28);
+								copybit(&temp, info.ev_.eventId, 0, 28);
 								memcpy_helper(address, &temp, 4, &offset);
 								memcpy_helper(address, &info.ev_.sourceId, 4, &offset);
 								memcpy_helper(address, &info.ev_.absoInfo.score, 4, &offset);
 								memset(&temp, 0, 4);
-								copybit(&temp, info.ev_.absoInfo.position, 23, 9);
+								copybit(&temp, info.ev_.absoInfo.position.x, 27, 5);
+                copybit(&temp, info.ev_.absoInfo.position.y, 23, 4);
 								copybit(&temp, info.ev_.absoInfo.direction, 21, 2);
 								copybit(&temp, info.ev_.absoInfo.cloak, 20, 1);
 								copybit(&temp, info.ev_.absoInfo.missileNumber, 18, 2);
@@ -685,7 +694,8 @@ MW244BPacket sendPacketToPlayer(unsigned char packType, packetInfo info) {
                 for(count=0; count<MAX_MISSILES; ++count){
 								  memset(&temp, 0, 4);
 									copybit(&temp, info.ev_.absoInfo.missiles[count].missileId, 14, 2);
-									copybit(&temp, info.ev_.absoInfo.missiles[count].position, 5, 9);
+									copybit(&temp, info.ev_.absoInfo.missiles[count].position.x, 9, 5);
+                  copybit(&temp, info.ev_.absoInfo.missiles[count].position.y, 5, 4);
 									copybit(&temp, info.ev_.absoInfo.missiles[count].direction, 3, 2);
                   uint16_t temp16 = temp;
 									memcpy_helper(address, &temp16, 2, &offset);
@@ -714,7 +724,8 @@ MW244BPacket sendPacketToPlayer(unsigned char packType, packetInfo info) {
                 memcpy_helper(address, &info.SIRes_.destinationId, 4, &offset); 
 								memcpy_helper(address, &info.SIRes_.absoInfo.score, 4, &offset);
 								memset(&temp, 0, 4);
-								copybit(&temp, info.SIRes_.absoInfo.position, 23, 9);
+								copybit(&temp, info.SIRes_.absoInfo.position.x, 27, 5);
+                copybit(&temp, info.SIRes_.absoInfo.position.y, 23, 4);
 								copybit(&temp, info.SIRes_.absoInfo.direction, 21, 2);
 								copybit(&temp, info.SIRes_.absoInfo.cloak, 20, 1);
 								copybit(&temp, info.SIRes_.absoInfo.missileNumber, 18, 2);
@@ -722,7 +733,8 @@ MW244BPacket sendPacketToPlayer(unsigned char packType, packetInfo info) {
                 for(count=0; count<MAX_MISSILES; ++count){
                   memset(&temp, 0, 4);
                   copybit(&temp, info.SIRes_.absoInfo.missiles[count].missileId, 14, 2);
-                  copybit(&temp, info.SIRes_.absoInfo.missiles[count].position, 5, 9);
+                  copybit(&temp, info.SIRes_.absoInfo.missiles[count].position.x, 9, 5);
+                  copybit(&temp, info.SIRes_.absoInfo.missiles[count].position.y, 5, 4);
                   copybit(&temp, info.SIRes_.absoInfo.missiles[count].direction, 3, 2);
                   uint16_t temp16 = temp;
                   memcpy_helper(address, &temp16, 2, &offset);
@@ -733,7 +745,7 @@ MW244BPacket sendPacketToPlayer(unsigned char packType, packetInfo info) {
 											//encoding data
 											memset(&temp, 0, 4);
 											copybit(&temp, info.SIRes_.uncommit[j].type, 28, 4);	
-											copybit(&temp, info.SIRes_.uncommit[j].EventId, 0, 28);
+											copybit(&temp, info.SIRes_.uncommit[j].eventId, 0, 28);
 											memset(&temp1, 0, 4);
 											memset(&temp2, 0, 4);
 							  			encodeEventData(&temp1, &temp2, info.SIRes_.uncommit[j].type, info.SIRes_.uncommit[j].eventData);	
@@ -750,11 +762,9 @@ MW244BPacket sendPacketToPlayer(unsigned char packType, packetInfo info) {
                 break;
 
 	}	
-  return pack;
-  /*if (sendto((int)M->theSocket(), &pack, sizeof(pack), 0,
-                     (struct sockaddr *)&destSocket, sizeof(Sockaddr)) < 0)
+  
+  if (sendto((int)M->theSocket(), &pack, sizeof(pack), 0, (struct sockaddr *)&groupAddr, sizeof(Sockaddr)) < 0)
             MWError((char *)"Sample error");
-            */
 }
 
 packetInfo packetParser(MW244BPacket* pack) {
@@ -777,7 +787,7 @@ packetInfo packetParser(MW244BPacket* pack) {
               memset(&temp, 0, 4);
               memcpy(&temp, pack->body, 4);
               info.ev_.type = parsebit(temp, 28, 4).bit_8;
-              info.ev_.EventId = parsebit(temp, 0, 28).bit_32;
+              info.ev_.eventId = parsebit(temp, 0, 28).bit_32;
               memcpy(&info.ev_.sourceId, ((uint8_t*) pack->body)+4, 4);
               info.ev_.absoInfo = parseAbsoluteInfo(((uint8_t*) pack->body) +8);
               info.ev_.eventData = parseEventData(((uint8_t*) pack->body)+16+MAX_MISSILES*2, info.ev_.type);
@@ -814,8 +824,90 @@ packetInfo packetParser(MW244BPacket* pack) {
   return info;
 }
 
+typedef std::set <uint32_t> respond_set;
+typedef uint32_t EventId;
+typedef uint32_t PlayerID;
+static respond_set hbACK_set;
+static std::set<packetInfo> player_unprocessed;
+static std::map<PlayerID, player_unprocessed> event_unprocessed;
+static std::map<EventId, respond_set> local_event_resend; //saved events per time slot
+static uint32_t NextEventID = 1;
+static uint32_t CommittedEvent = 0;
 
-void packet_handler(packetInfo info) {
+/*
+  This function handles received packets as bellow:
+    Heartbeat     - Directly send back HeartbeatACK
+    HeartbeatACK  - Update the static set hbACK_set
+    Event         - Save it into unprocessed queue; if it doesn't exist already, send back EventACK
+    EventACK      - Update the local_event_resend
+    STATERequest  - Send STATEPesponse, and save it into resend queue
+    STATEResponse - This phase shouldn't receive it, drop
+    STATEACK      - Delete STATEResponse in resend queue
+*/
+void packet_handler(unsigned char type, packetInfo info) {
+  switch(type) {
+    case HEARTBEAT:
+      packetInfo respond;
+      respond.hbACK_.heartbeatId   = info.hb_.heartbeatId;
+      respond.hbACK_.sourceId      = M->myRatId(); //TODO: This may be not unique, think another way to fix it later
+      respond.hbACK_.destinationId = info.hb_.sourceId;
+      sendPacketToPlayer(HEARTBEATACK, respond);
+      break;
+
+    case HEARTBEATACK:
+      //update the static set for heartbeat respond
+      hbACK_set.insert(info.hbACK_.sourceId);
+      break;
+
+    case EVENT:
+      auto player_iter = event_unprocessed.find(info.ev_.sourceId);
+      if(player_iter == event_unprocessed.end())  break; //exit if the player doesn't exist
+      auto event_iter = player_iter->second.find(info.ev_.EventId);
+      if(iter != player_iter->second.end()) break; //exit if the event already exist
+      packetInfo respond;
+      respond.evACK_.eventId       = info.ev_.EventId;
+      respond.evACK_.sourceId      = M->myRatId();
+      respond.evACK_.destinationId = info.ev_.sourceId;
+      sendPacketToPlayer(EVENTACK, respond);
+      break;
+
+    case EVENTACK:
+      if(info.evACK_.destinationId != M->myRatId())  break;
+      auto iter = local_event_resend.find(info.evACK_.eventId);
+      if(iter == local_event_resend.end())  break; //event has already been committed
+      local_event_resend->second.erase(info.evACK_.sourceId);
+      break;
+
+    case STATEREQUEST:
+      packetInfo respond;
+      respond.SIRes_.sourceId      = M->myRatId();
+      respond.SIRes_.destinationId = info.SIReq_.sourceId;
+      respond.SIRes_.absoInfo.score = M->score().value();
+      uint16_t position = 
+      respond.SIRes_.absoInfo.position = position;
+      respond.SIRes_.absoInfo.direction = M->dir().value();
+      respond.SIRes_.absoInfo.missileNumber = MAX_MISSILES;
+      Missile temp_missile[MAX_MISSILES] = *M->rat(0).RatMissile;
+      for(int i=0; i<MAX_MISSILES; ++i){
+        respond.SIRes_.absoInfo.missiles[i].missileId = temp_missile[i].exist;
+        respond.SIRes_.absoInfo.missiles[i].position.x  = temp_missile[i].x.value();
+        respond.SIRes_.absoInfo.missiles[i].position.y  = temp_missile[i].y.value();
+        respond.SIRes_.absoInfo.missiles[i].direction = temp_missile[i].dir.value();
+      }
+      auto player_iter = event_unprocessed.find(info.ev_.M->myRatId());
+      respond.SIRes_.uncommitted_number = player_iter->second.size();
+      for(auto it: player_iter->second){ //size of all local events
+        respond.SIRes_.uncommit[i].type       =  it.ev_.type;
+        respond.SIRes_.uncommit[i].eventId    =  it.ev_.eventId;
+        respond.SIRes_.uncommit[i].eventData  =  it.ev_.eventData;
+      }
+      sendPacketToPlayer(STATERESPONSE, respond);
+      break;
+
+    case STATERESPONSE:
+      break;
+
+  }
 
 
 }
@@ -846,7 +938,7 @@ void processPacket(MWEvent *eventPacket) {
 	 * case State Inquiry ACK:					Clear relevant State Inquiry Response resend
 	 */
   packetInfo info = packetParser(eventPacket->eventDetail);
-  //packet_handler(info);
+  packet_handler(eventPacket->eventDetail->type, info);
 	return;
 }
 
