@@ -102,21 +102,75 @@ absoluteInfo setAbsoluInfo(){
   return info;
 }
 
-eventSpecificData setEventInfo(){
+eventSpecificData setEventInfo(int type){
   eventSpecificData info;
-  info.missileHitData.ownerId = 0xdddddddd;
-  info.missileHitData.missileId = 3;
-  info.missileHitData.position = 511;
-  info.missileHitData.direction = 2;
+  switch(type){
+    case 4:
+      info.missileHitData.ownerId = 0xdddddddd;
+      info.missileHitData.missileId = 3;
+      info.missileHitData.position = 1023;
+      info.missileHitData.direction = 3;
+      break;
+
+    case 3:
+      info.missileProjData.missileId = 1;
+      info.missileProjData.position = 1023;
+      info.missileProjData.direction = 3;
+      break;
+
+    case 2:
+      info.bornData.position = 1023;
+      info.bornData.direction = 3;
+      break;
+
+    case 1:
+      info.moveData.direction = 3;
+      info.moveData.speed = 2;
+      break;
+
+    case 0:
+      info.cloak = 1; 
+      break; 
+  }
+  
   return info;
 }
 
 packetInfo setEvent(packetInfo info){
-  info.ev_.type = 15;
+  info.ev_.type = 0;
   info.ev_.EventId = 1;
   info.ev_.sourceId = 0x7f010100;
   info.ev_.absoInfo = setAbsoluInfo();
-  info.ev_.eventData = setEventInfo();
+  info.ev_.eventData = setEventInfo(info.ev_.type);
+  return info;
+}
+
+packetInfo setEventACK(packetInfo info){
+  info.evACK_.eventId = 0xffffffff;
+  info.evACK_.sourceId = 0x7f010100;
+  info.evACK_.destinationId = 0xffffffff;
+  return info;
+}
+
+packetInfo setSIREQ(packetInfo info){
+  info.SIReq_.sourceId = 0xffffffff;
+  return info;
+}
+
+packetInfo setSIRES(packetInfo info){
+  info.SIRes_.sourceId = 0xffffffff;
+  info.SIRes_.destinationId = 0xffffffff;
+  info.SIRes_.uncommitted_number = 5;
+  info.SIRes_.absoInfo = setAbsoluInfo();
+  info.SIRes_.uncommit[MAX_UNCOMMITED-1].type = 4;
+  info.SIRes_.uncommit[MAX_UNCOMMITED-1].EventId = 0xffffffff;
+  info.SIRes_.uncommit[MAX_UNCOMMITED-1].eventData = setEventInfo(4);
+  return info;
+}
+
+packetInfo setSIACK(packetInfo info){
+  info.SIACK_.sourceId = 0xffffffff;
+  info.SIACK_.destinationId = 0xffffffff;
   return info;
 }
 
@@ -124,13 +178,17 @@ int main(int argc, char *argv[]) {
   packetInfo testInfo;
   //testInfo = setHeartbeat(testInfo);
   //testInfo = setHeartbeatACK(testInfo);
-  testInfo = setEvent(testInfo);
-  MW244BPacket pack = sendPacketToPlayer(EVENT, testInfo);
+  //testInfo = setEvent(testInfo);
+  //testInfo = setEventACK(testInfo);
+  testInfo = setSIRES(testInfo);
+  MW244BPacket pack = sendPacketToPlayer(STATERESPONSE, testInfo);
   print_test(pack.body[0]);
   print_test(pack.body[1]); 
   print_test(pack.body[2]);
   print_test(pack.body[3]); 
-   
+  print_test(pack.body[9]);
+  print_test(pack.body[10]);  
+
 }
 
 /* ----------------------------------------------------------------------- */
