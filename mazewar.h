@@ -71,6 +71,8 @@ SOFTWARE.
 /* The next two >must< be a power of two, because we subtract 1 from them
    to get a bitmask for random()
  */
+#define JOINPHASE 0
+#define PLAYPHASE 1
 #define MAX_UNCOMMITED 5
 #define MAZEXMAX 32
 #define MAZEYMAX 16
@@ -289,7 +291,7 @@ public:
   MazeType maze_;
   RatName myName_;
 	//Used to map Index with their ID
-	std::map<RatIndexType, RatId> AllRats;
+	std::map<RatId, int> AllRats;
 
 protected:
   MazewarInstance(string s)
@@ -509,7 +511,7 @@ void ratState(void);
 void manageMissiles(void);
 void DoViewUpdate(void);
 void sendPacketToPlayer(unsigned char, packetInfo);
-void processPacket(MWEvent *);
+void processPacket(MWEvent *, int);
 void netInit(void);
 void copybit(uint32_t, uint32_t, uint8_t, uint8_t);
 parsedInfo parsebit(uint32_t, uint8_t, uint8_t);
@@ -519,6 +521,7 @@ uncommittedAction parseUncommit(uint8_t*);
 void encodeEventData(uint32_t*, uint32_t*, uint8_t, eventSpecificData);
 void memcpy_helper(void*, void*, std::size_t);
 packetInfo packetParser(MW244BPacket*);
+packetInfo eventPacketGenerator(uint8_t, eventSpecificData);
 
 /* winsys.c */
 void InitWindow(int, char **);

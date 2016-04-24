@@ -53,11 +53,23 @@ int main(int argc, char *argv[]) {
 
   MazeInit(argc, argv);
 
-  NewPosition(M);
-
-  /* So you can see what a Rat is supposed to look like, we create
-  one rat in the single player mode Mazewar.
-  It doesn't move, you can't shoot it, you can just walk around it */
+  if (argc == 5) {
+      M->xlocIs(atoi(argv[2]));
+      M->ylocIs(atoi(argv[3]));
+    // match input to direction representation
+    if (!strcmp(argv[4], "n"))
+      M->dirIs(NORTH);
+    else if (!strcmp(argv[4], "s"))
+      M->dirIs(SOUTH);
+    else if (!strcmp(argv[4], "e"))
+      M->dirIs(EAST);
+    else if (!strcmp(argv[4], "w"))
+      M->dirIs(WEST);
+    else
+      M->dirIs(NORTH);
+  } else {
+    NewPosition(M);
+  }
 
 	JoinGame();
   play();
@@ -67,8 +79,43 @@ int main(int argc, char *argv[]) {
 
 /* ----------------------------------------------------------------------- */
 void JoinGame(){
-  
+  MWEvent event;
+  MW244BPacket incoming;
+  event.eventDetail = &incoming;
+  //send SI request
+
+  int join_phase_finsh = 1;
+  //busy waiting, respond to hb, save SI response
+  while(join_phase_finsh){
+    NextEvent(&event, M->theSocket());
+    switch(event.eventType){
+      case EVENT_NETWORK:
+        processPacket(&event, JOINPHASE);
+        break;
+
+      case EVENT_TIMEOUT:
+        join_phase_finsh = 1;
+        break;
+
+      case EVENT_INT:
+        quit(0);
+        break;
+    }
+  }
+  //Update own infomation, like x, y, dir
+
+
+  //send born event
+  packetInfo packet;
+  Rat temp_rat = M->rat(0);
+  eventSpecificData eventData;
+  eventData.bornData.position.x = temp_rat.y.value();
+  eventData.bornData.position.y = temp_rat.y.value();
+  eventData.bornData.direction = temp_rat.dir.value();
+  packet = eventPacketGenerator(EVENTBORN, eventData); 
+  sendPacketToPlayer(EVENT, packet); 
 }
+
 
 /* ----------------------------------------------------------------------- */
 void play(void) {
@@ -81,6 +128,11 @@ void play(void) {
     NextEvent(&event, M->theSocket());
     if (!M->peeking())
       switch (event.eventType) {
+      case EVENT_TIMEOUT: {
+        ratStates(); /* clean house */
+        manageMissiles();
+      } break;
+
       case EVENT_A:
         aboutFace();
         break;
@@ -118,7 +170,7 @@ void play(void) {
         break;
 
       case EVENT_NETWORK:
-        processPacket(&event);
+        processPacket(&event, PLAYPHASE);
         break;
 
       case EVENT_INT:
@@ -127,19 +179,21 @@ void play(void) {
       }
     else
       switch (event.eventType) {
+      case EVENT_TIMEOUT: {
+        ratStates(); /* clean house */
+        manageMissiles();
+      } break;
       case EVENT_RIGHT_U:
       case EVENT_LEFT_U:
         peekStop();
         break;
 
       case EVENT_NETWORK:
-        processPacket(&event);
+        processPacket(&event, PLAYPHASE);
         break;
       }
 
-    ratStates(); /* clean house */
 
-    manageMissiles();
 
     DoViewUpdate();
 
@@ -539,14 +593,20 @@ void ConvertOutgoing(MW244BPacket *p) {}
 
 /* This is just for the sample version, rewrite your own */
 void ratStates() {
-  /* In our sample version, we don't know about the state of any rats over
-     the net, so this is a no-op */
+  //Here process all events to update status in mazeRats_[], triggered by a timer
+
+
 }
 
 /* ----------------------------------------------------------------------- */
 
 /* This is just for the sample version, rewrite your own */
 void manageMissiles() {
+  /*Here updates all missiles in all rats, if the missile hit yourself, send a missilehit packet and born event, if the missile hit a wall,
+    change it's exist to FALSE
+  */
+
+
   /* Leave this up to you. */
   /*
   //You may find the following lines useful
@@ -924,6 +984,8 @@ packetInfo packetParser(MW244BPacket* pack) {
   return info;
 }
 
+
+
 /*
   This function handles received packets as bellow:
     Heartbeat     - Directly send back HeartbeatACK
@@ -934,6 +996,68 @@ packetInfo packetParser(MW244BPacket* pack) {
     STATEResponse - This phase shouldn't receive it, drop
     STATEACK      - Delete STATEResponse in resend queue
 */
+void join_handler(unsigned char type, packetInfo info){
+  packetInfo respond;
+
+  switch(type) {
+    case HEARTBEAT: {
+      respond.hbACK_.heartbeatId   = info.hb_.heartbeatId;
+      respond.hbACK_.sourceId      = M->myRatId().value(); //TODO: This may be not unique, think another way to fix it later
+      respond.hbACK_.destinationId = info.hb_.sourceId;
+      sendPacketToPlayer(HEARTBEATACK, respond);
+    }break;
+
+    case STATERESPONSE:{
+      /*Two things here:
+          1. Save all uncommitted events
+          2. Update all received absolute information in mazeRats_
+      */
+      //If the SI response from this source has been received, break; else, save it
+      if(hbACK_set.find(info.SIRes_.sourceId)!=hbACK_set.end()) break;
+      else hbACK_set.insert(info.SIRes_.sourceId);
+
+      //Generate the uncommitted event for next timeslot
+      respond.ev_.absoInfo = info.SIRes_.absoInfo;
+      respond.ev_.sourceId = info.SIRes_.sourceId;
+
+      event_unprocessed temp_events;
+      for(int i=0; i<info.SIRes_.uncommitted_number; ++i){
+        respond.ev_.type = info.SIRes_.uncommit[i].type;  
+        respond.ev_.eventId = info.SIRes_.uncommit[i].eventId;
+        respond.ev_.eventData = info.SIRes_.uncommit[i].eventData;
+        temp_events.insert({respond.ev_.eventId, respond});
+      }
+      events_all_player.insert({respond.ev_.sourceId, temp_events});
+      int index = 1;
+      //Update information in mazeRats_, 0 is reserved for own
+      for(; index < MAX_RATS; ++index){
+          if (M->AllRats.find(info.SIRes_.sourceId)==M->AllRats.end()){
+            M->AllRats.insert({info.SIRes_.sourceId, index});
+            break;
+          }
+      }
+      if(index == MAX_RATS) printf("Reach max rats limit, can not let new rat join!\n");
+      Rat temp_rat;
+      //TODO: add name
+      //temp_rat.Name = "Tom";
+      temp_rat.playing = TRUE;
+      temp_rat.cloaked = info.SIRes_.absoInfo.cloak;
+      temp_rat.x = info.SIRes_.absoInfo.position.x;
+      temp_rat.y = info.SIRes_.absoInfo.position.y;
+      temp_rat.dir = info.SIRes_.absoInfo.direction;
+      temp_rat.score = info.SIRes_.absoInfo.score;
+      for(int i=0; i<MAX_MISSILES; ++i){
+        if(info.SIRes_.absoInfo.missiles[i].exist != 0){
+          temp_rat.RatMissile[i].exist = TRUE;
+          temp_rat.RatMissile[i].x = info.SIRes_.absoInfo.missiles[i].position.x;
+          temp_rat.RatMissile[i].y = info.SIRes_.absoInfo.missiles[i].position.y;
+          temp_rat.RatMissile[i].dir = info.SIRes_.absoInfo.missiles[i].direction;
+        }
+      }
+    }break;
+  }
+}
+
 void packet_handler(unsigned char type, packetInfo info) {
   packetInfo respond;
   event_unprocessed_iter iter;
@@ -943,12 +1067,12 @@ void packet_handler(unsigned char type, packetInfo info) {
       respond.hbACK_.sourceId      = M->myRatId().value(); //TODO: This may be not unique, think another way to fix it later
       respond.hbACK_.destinationId = info.hb_.sourceId;
       sendPacketToPlayer(HEARTBEATACK, respond);
-      }break;
+    }break;
 
     case HEARTBEATACK: {
       //update the static set for heartbeat respond
       hbACK_set.insert(info.hbACK_.sourceId);
-      }break;
+    }break;
 
     case EVENT: { 
       iter = events_all_player.find(info.ev_.sourceId);
@@ -960,14 +1084,14 @@ void packet_handler(unsigned char type, packetInfo info) {
       respond.evACK_.sourceId      = M->myRatId().value();
       respond.evACK_.destinationId = info.ev_.sourceId;
       sendPacketToPlayer(EVENTACK, respond);
-      }break;
+    }break;
 
     case EVENTACK: { 
       if(info.evACK_.destinationId != M->myRatId().value())  break;
       std::map<EventId, respond_set>::iterator iter_ = local_event_resend.find(info.evACK_.eventId);
       if(iter_ == local_event_resend.end())  break; //event has already been committed
       iter_->second.erase(info.evACK_.sourceId);
-      }break;
+    }break;
 
     case STATEREQUEST: { 
       respond.SIRes_.sourceId      = M->myRatId().value();
@@ -998,10 +1122,10 @@ void packet_handler(unsigned char type, packetInfo info) {
         ++i;
       }
       sendPacketToPlayer(STATERESPONSE, respond);
-      }break;
+    }break;
 
     case STATERESPONSE:
-      break;
+    break;
 
   }
 
@@ -1011,31 +1135,18 @@ void packet_handler(unsigned char type, packetInfo info) {
 
 /* Sample of processPacket. */
 
-void processPacket(MWEvent *eventPacket) {
-  /*
-          MW244BPacket		*pack = eventPacket->eventDetail;
-          DataStructureX		*packX;
+void processPacket(MWEvent *eventPacket, int phase) {
 
-          switch(pack->type) {
-          case PACKET_TYPE_X:
-            packX = (DataStructureX *) &(pack->body);
-            break;
-          case ...
-          }
-  */
-
-  /*
-	 * case Heartbeat: 									Send Heartbeat ACK
-	 * case Heartbeat ACK: 							Clear relevant Heartbeat resend
-	 * case Event: 											Save the action into next time slot to process, send Event ACK
-	 * case Event ACK: 									Clear relevant Event resend
-	 * case State Inquiry Request: 			Send State Inquiry Response
-	 * case State Inquiry Response:			Clear relevant State Inquiry Request resend, send State Inquiry ACK 
-	 * case State Inquiry ACK:					Clear relevant State Inquiry Response resend
-	 */
   packetInfo info = packetParser(eventPacket->eventDetail);
-  packet_handler(eventPacket->eventDetail->type, info);
-	return;
+  switch(phase){
+    case JOINPHASE:
+      join_handler(eventPacket->eventDetail->type, info);
+      break;
+    case PLAYPHASE:
+      packet_handler(eventPacket->eventDetail->type, info);
+      break;
+  }
+  return;
 }
 
 /* ----------------------------------------------------------------------- */
@@ -1115,7 +1226,7 @@ void netInit() {
   M->myRatIdIs(htonl(thisHost->sin_addr.s_addr));
   M->scoreIs(0);
   SetMyRatIndexType(0);
-	M->AllRats.insert({M->myIndex(), M->myRatId()});
+	M->AllRats.insert({M->myRatId(), M->myIndex().value()});
 
   /* Get the multi-cast address ready to use in SendData()
      calls. */

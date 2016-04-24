@@ -142,7 +142,7 @@ const void *blah;
 #define offset(field) XtOffset(struct _resources *, field)
 static XtResource resources[] = {
     {"time_interval", "Time_Interval", XtRInt, sizeof(int),
-     offset(time_interval), XtRString, strdup("500")},
+     offset(time_interval), XtRString, strdup("300")},
     {XtNforeground, XtCForeground, XtRPixel, sizeof(Pixel), offset(fg_pixel),
      XtRString, strdup("black")},
     {XtNbackground, XtCBackground, XtRPixel, sizeof(Pixel), offset(bg_pixel),
