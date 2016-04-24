@@ -153,9 +153,50 @@ static Direction _aboutFace[NDIRECTION] = {SOUTH, NORTH, WEST, EAST};
 static Direction _leftTurn[NDIRECTION] = {WEST, EAST, NORTH, SOUTH};
 static Direction _rightTurn[NDIRECTION] = {EAST, WEST, SOUTH, NORTH};
 
+absoluteInfo absoluteInfoGenerator(){
+  Rat temp_rat = M->rat(0);
+  absoluteInfo info;
+  info.score = temp_rat.score.value();
+  info.position.x = temp_rat.x.value();
+  info.position.y = temp_rat.y.value();
+  info.direction = temp_rat.dir.value();
+  info.cloak = temp_rat.cloaked;
+  info.missileNumber = 0;
+  Missile* temp_missile = temp_rat.RatMissile;
+  for(int i=0; i<MAX_MISSILES; ++i){
+    if(temp_missile->exist){
+      info.missiles[i].exist = TRUE;
+      info.missiles[i].position.x = temp_missile->x.value();
+      info.missiles[i].position.y = temp_missile->y.value();
+      info.missiles[i].direction = temp_missile->dir.value();
+      info.missileNumber += 1 << i;
+    }else {
+      info.missiles[i].exist = FALSE;
+    }
+    temp_missile++;
+  }
+  return info;
+}
+
+packetInfo eventPacketGenerator(uint8_t eventtype, eventSpecificData eventData){
+  packetInfo info;
+  info.ev_.type = eventtype;
+  info.ev_.sourceId = M->myRatId().value();
+  info.ev_.eventId = NextEventID;
+  NextEventID++;
+  info.ev_.absoInfo = absoluteInfoGenerator();
+  info.ev_.eventData = eventData;
+  return info;
+}
+
 void aboutFace(void) {
   M->dirIs(_aboutFace[MY_DIR]);
   updateView = TRUE;
+  eventSpecificData eventData;
+  eventData.moveData.direction = _aboutFace[MY_DIR].value();
+  eventData.moveData.speed = 0;
+  packetInfo info = eventPacketGenerator(EVENTMOVE, eventData);
+  sendPacketToPlayer(EVENT, info); 
 }
 
 /* ----------------------------------------------------------------------- */
@@ -163,6 +204,11 @@ void aboutFace(void) {
 void leftTurn(void) {
   M->dirIs(_leftTurn[MY_DIR]);
   updateView = TRUE;
+  eventSpecificData eventData;
+  eventData.moveData.direction = _leftTurn[MY_DIR].value();
+  eventData.moveData.speed = 0;
+  packetInfo info = eventPacketGenerator(EVENTMOVE, eventData);
+  sendPacketToPlayer(EVENT, info); 
 }
 
 /* ----------------------------------------------------------------------- */
@@ -170,6 +216,11 @@ void leftTurn(void) {
 void rightTurn(void) {
   M->dirIs(_rightTurn[MY_DIR]);
   updateView = TRUE;
+  eventSpecificData eventData;
+  eventData.moveData.direction = _rightTurn[MY_DIR].value();
+  eventData.moveData.speed = 0;
+  packetInfo info = eventPacketGenerator(EVENTMOVE, eventData);
+  sendPacketToPlayer(EVENT, info); 
 }
 
 /* ----------------------------------------------------------------------- */
@@ -204,6 +255,11 @@ void forward(void) {
     M->xlocIs(Loc(tx));
     M->ylocIs(Loc(ty));
     updateView = TRUE;
+    eventSpecificData eventData;
+    eventData.moveData.direction = MY_DIR;
+    eventData.moveData.speed = 1;
+    packetInfo info = eventPacketGenerator(EVENTMOVE, eventData);
+    sendPacketToPlayer(EVENT, info); 
   }
 }
 
@@ -237,6 +293,11 @@ void backward() {
     M->xlocIs(Loc(tx));
     M->ylocIs(Loc(ty));
     updateView = TRUE;
+    eventSpecificData eventData;
+    eventData.moveData.direction = MY_DIR;
+    eventData.moveData.speed = 2;
+    packetInfo info = eventPacketGenerator(EVENTMOVE, eventData);
+    sendPacketToPlayer(EVENT, info); 
   }
 }
 
@@ -343,17 +404,46 @@ void peekStop() {
   updateView = TRUE;
 }
 
+
+
+
 /* ----------------------------------------------------------------------- */
 
 void shoot() { 
-
+  //Add cooldown timer
+  Rat temp_rat = M->rat(0);
+  Missile* temp_missile = temp_rat.RatMissile;
+  int i;
+  for(i=0; i<MAX_MISSILES; ++i){
+    if(!temp_missile->exist) break;
+    temp_missile++;
+  }
+  if(i == MAX_MISSILES){
+    printf("Max missile limit %d", MAX_MISSILES);
+    return;
+  }
+  temp_missile->exist = TRUE;
+  temp_missile->x = temp_rat.y;
+  temp_missile->y = temp_rat.x;
+  temp_missile->dir = temp_rat.dir;
+  eventSpecificData eventData;
+  eventData.missileProjData.missileId = i;
+  eventData.missileProjData.position.x = temp_rat.x.value();
+  eventData.missileProjData.position.y = temp_rat.y.value();
+  eventData.missileProjData.direction = temp_rat.dir.value();
+  sendPacketToPlayer(EVENT, eventPacketGenerator(EVENTSHOOT, eventData));
 
 }
 
 /* ----------------------------------------------------------------------- */
 
 void cloak() { 
-				printf("Implement cloak()\n");
+  //implement timer here
+  eventSpecificData eventData;
+  eventData.cloak = TRUE;
+  packetInfo info = eventPacketGenerator(EVENTSHOOT, eventData);
+  sendPacketToPlayer(EVENT, info);
+
 }
 
 
@@ -534,11 +624,11 @@ absoluteInfo parseAbsoluteInfo(uint8_t* address){
   result.position.y = parsebit(temp, 23, 4).bit_16;
   result.direction = parsebit(temp, 21, 2).bit_8;
   result.cloak = parsebit(temp, 20, 1).bit_1;
-  result.missileNumber = parsebit(temp, 18, 2).bit_8;
+  result.missileNumber = parsebit(temp, 16, 4).bit_8;
   for(int count=0; count<MAX_MISSILES; ++count){
     memset(&temp16, 0, 2);
     memcpy(&temp16, ((uint8_t*)address)+8+count*2, 2);
-    result.missiles[count].missileId = parsebit(temp16, 14, 2).bit_8;
+    result.missiles[count].exist = parsebit(temp16, 14, 2).bit_8;
     result.missiles[count].position.x = parsebit(temp16, 9, 5).bit_16;
     result.missiles[count].position.y = parsebit(temp16, 5, 4).bit_16;
     result.missiles[count].direction = parsebit(temp16, 3, 2).bit_8;
@@ -699,11 +789,11 @@ void sendPacketToPlayer(unsigned char packType, packetInfo info) {
                 copybit(&temp, info.ev_.absoInfo.position.y, 23, 4);
 								copybit(&temp, info.ev_.absoInfo.direction, 21, 2);
 								copybit(&temp, info.ev_.absoInfo.cloak, 20, 1);
-								copybit(&temp, info.ev_.absoInfo.missileNumber, 18, 2);
+								copybit(&temp, info.ev_.absoInfo.missileNumber, 16, 4);
 								memcpy_helper(address, &temp, 4, &offset);
                 for(count=0; count<MAX_MISSILES; ++count){
 								  memset(&temp, 0, 4);
-									copybit(&temp, info.ev_.absoInfo.missiles[count].missileId, 14, 2);
+									copybit(&temp, info.ev_.absoInfo.missiles[count].exist, 14, 2);
 									copybit(&temp, info.ev_.absoInfo.missiles[count].position.x, 9, 5);
                   copybit(&temp, info.ev_.absoInfo.missiles[count].position.y, 5, 4);
 									copybit(&temp, info.ev_.absoInfo.missiles[count].direction, 3, 2);
@@ -738,11 +828,11 @@ void sendPacketToPlayer(unsigned char packType, packetInfo info) {
                 copybit(&temp, info.SIRes_.absoInfo.position.y, 23, 4);
 								copybit(&temp, info.SIRes_.absoInfo.direction, 21, 2);
 								copybit(&temp, info.SIRes_.absoInfo.cloak, 20, 1);
-								copybit(&temp, info.SIRes_.absoInfo.missileNumber, 18, 2);
+								copybit(&temp, info.SIRes_.absoInfo.missileNumber, 16, 4);
 								memcpy_helper(address, &temp, 4, &offset);
                 for(count=0; count<MAX_MISSILES; ++count){
                   memset(&temp, 0, 4);
-                  copybit(&temp, info.SIRes_.absoInfo.missiles[count].missileId, 14, 2);
+                  copybit(&temp, info.SIRes_.absoInfo.missiles[count].exist, 14, 2);
                   copybit(&temp, info.SIRes_.absoInfo.missiles[count].position.x, 9, 5);
                   copybit(&temp, info.SIRes_.absoInfo.missiles[count].position.y, 5, 4);
                   copybit(&temp, info.SIRes_.absoInfo.missiles[count].direction, 3, 2);
@@ -886,12 +976,13 @@ void packet_handler(unsigned char type, packetInfo info) {
       respond.SIRes_.absoInfo.position.x = M->xloc().value();
       respond.SIRes_.absoInfo.position.y = M->yloc().value();
       respond.SIRes_.absoInfo.direction = M->dir().value();
-      respond.SIRes_.absoInfo.missileNumber = MAX_MISSILES;
+      respond.SIRes_.absoInfo.missileNumber = 0;
       Rat temp_rat = M->rat(0);
       Missile* temp_missile = temp_rat.RatMissile;
       //Missile temp_missile[MAX_MISSILES] = temp_rat.RatMissile;
       for(int i=0; i<MAX_MISSILES; ++i){
-        respond.SIRes_.absoInfo.missiles[i].missileId = temp_missile->exist;
+        respond.SIRes_.absoInfo.missiles[i].exist = temp_missile->exist;
+        if(temp_missile->exist) respond.SIRes_.absoInfo.missileNumber += 1<<i;
         respond.SIRes_.absoInfo.missiles[i].position.x = temp_missile->x.value();
         respond.SIRes_.absoInfo.missiles[i].position.y = temp_missile->y.value();
         respond.SIRes_.absoInfo.missiles[i].direction = temp_missile->dir.value();

@@ -97,6 +97,12 @@ SOFTWARE.
 
 #define MAX_MISSILES 4
 
+#define EVENTCLOAK 0
+#define EVENTMOVE 1
+#define EVENTBORN 2
+#define EVENTSHOOT 3
+#define EVENTHIT 4
+
 using namespace std;
 
 /* types */
@@ -348,7 +354,7 @@ struct heartbeatACK{
 };
 
 struct missileInfo{
-	uint8_t missileId;
+	uint8_t exist;
 	Position_ position;
 	uint8_t direction;
 };
