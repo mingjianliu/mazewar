@@ -16,6 +16,8 @@
 #include <string.h>
 #include <unistd.h>
 
+using namespace std;
+
 static bool updateView; /* true if update needed */
 MazewarInstance::Ptr M;
 
@@ -29,7 +31,7 @@ static event_unprocessed events_all_player; //saved event to processed in the en
 static std::map<EventId, respond_set> local_event_resend; //events sent from local this time slot
 static uint32_t HeartbeatID = 1;
 static uint32_t NextEventID = 1;
-static uint32_t CommittedEvent = 0;
+//static uint32_t CommittedEvent = 0;
 
 #define MAX_OTHER_RATS (MAX_RATS - 1)
 
@@ -94,7 +96,7 @@ void JoinGame(){
         break;
 
       case EVENT_TIMEOUT:
-        join_phase_finsh = 1;
+        join_phase_finsh = 0;
         break;
 
       case EVENT_INT:
@@ -103,17 +105,26 @@ void JoinGame(){
     }
   }
   //Update own infomation, like x, y, dir
-
+  Rat temp_rat = M->rat(0);
+  //temp_rat.Name = M->myName_;
+  temp_rat.dir = M->dir();
+  temp_rat.score = M->score();
+  temp_rat.x = M->xloc();
+  temp_rat.y = M->yloc();
+  temp_rat.cloaked = FALSE;
+  for(int i=0; i<MAX_MISSILES; ++i)
+    temp_rat.RatMissile[i].exist = FALSE;
+  M->ratIs(temp_rat, 0);
 
   //send born event
   packetInfo packet;
-  Rat temp_rat = M->rat(0);
   eventSpecificData eventData;
   eventData.bornData.position.x = temp_rat.y.value();
   eventData.bornData.position.y = temp_rat.y.value();
   eventData.bornData.direction = temp_rat.dir.value();
   packet = eventPacketGenerator(EVENTBORN, eventData); 
   sendPacketToPlayer(EVENT, packet); 
+  NotifyPlayer();
 }
 
 
@@ -129,8 +140,11 @@ void play(void) {
     if (!M->peeking())
       switch (event.eventType) {
       case EVENT_TIMEOUT: {
-        ratStates(); /* clean house */
+        ratStates(); 
         manageMissiles();
+        //After consistency resolved, state and view might be changed
+        updateView = TRUE;
+        DoViewUpdate(); 
       } break;
 
       case EVENT_A:
@@ -182,6 +196,8 @@ void play(void) {
       case EVENT_TIMEOUT: {
         ratStates(); /* clean house */
         manageMissiles();
+        updateView = TRUE;
+        DoViewUpdate();
       } break;
       case EVENT_RIGHT_U:
       case EVENT_LEFT_U:
@@ -192,10 +208,7 @@ void play(void) {
         processPacket(&event, PLAYPHASE);
         break;
       }
-
-
-
-    DoViewUpdate();
+      DoViewUpdate();
 
     /* Any info to send over network? */
   }
@@ -591,10 +604,157 @@ void ConvertOutgoing(MW244BPacket *p) {}
 
 /* ----------------------------------------------------------------------- */
 
-/* This is just for the sample version, rewrite your own */
-void ratStates() {
-  //Here process all events to update status in mazeRats_[], triggered by a timer
+Rat setAbsoInfo(Rat temp_rat, absoluteInfo absoInfo){
+  temp_rat.cloaked = absoInfo.cloak;
+  temp_rat.dir = absoInfo.direction;
+  temp_rat.x = absoInfo.position.x;
+  temp_rat.y = absoInfo.position.y;
+  temp_rat.score = absoInfo.score;
+  for(int i=0; i<MAX_MISSILES; ++i){
+    if(absoInfo.missiles[i].exist){
+      temp_rat.RatMissile[i].exist  = TRUE;
+      temp_rat.RatMissile[i].x      = absoInfo.missiles[i].position.x;
+      temp_rat.RatMissile[i].y      = absoInfo.missiles[i].position.y;
+      temp_rat.RatMissile[i].dir    = absoInfo.missiles[i].direction;
+      
+    }
+  }
+  return temp_rat;
+}
 
+Rat processEvent(Rat temp_rat, eventSpecificData eventData, uint8_t type){
+  switch(type){
+    case EVENTCLOAK: {
+      temp_rat.cloaked = eventData.cloak;
+    }break;
+
+    case EVENTMOVE: {
+      if(eventData.moveData.speed == 0){//change direction
+        temp_rat.dir = eventData.moveData.direction;
+      }else {//move
+        //offset = 1 if forward, otherwise -1
+        int offset = (eventData.moveData.speed == 1)? 1: -1;
+        int x = temp_rat.x.value();
+        int y = temp_rat.y.value();
+        switch(temp_rat.dir.value()){
+          case NORTH:
+            if (!M->maze_[x + offset][y])
+              temp_rat.x = x + offset;
+            break;
+          case SOUTH:
+            if (!M->maze_[x - offset][y])
+              temp_rat.x = x - offset;
+            break;
+          case EAST:
+            if (!M->maze_[x][y + offset])
+              temp_rat.y = y + offset;
+            break;
+          case WEST:
+            if (!M->maze_[x][y - offset])
+              temp_rat.y = y - offset;
+            break;
+        }
+      }
+    }break;      
+
+    case EVENTBORN: {
+      temp_rat.dir  = eventData.bornData.direction;
+      temp_rat.x    = eventData.bornData.position.x;
+      temp_rat.y    = eventData.bornData.position.y;    
+    }break;  
+
+    case EVENTSHOOT: {
+      int missileId = eventData.missileProjData.missileId;
+      if(missileId < 0 || missileId >= MAX_MISSILES){
+        MWError((char*)"Wrong missileId\n");
+        break;
+      } 
+      temp_rat.RatMissile[missileId].exist = TRUE;
+      temp_rat.RatMissile[missileId].x = eventData.missileProjData.position.x;
+      temp_rat.RatMissile[missileId].y = eventData.missileProjData.position.y;
+      temp_rat.RatMissile[missileId].dir = eventData.missileProjData.direction;
+    }break;
+
+    case EVENTHIT:  {
+      //Here only change the score, disappear the missile   
+      temp_rat.score = temp_rat.score.value() - (5 + (temp_rat.cloaked)? 2:0);
+      //If the owner exist, add score, disapper the missile
+      if(M->AllRats.find(eventData.missileHitData.ownerId) != M->AllRats.end()){
+        int ratindex = (M->AllRats.find(eventData.missileHitData.ownerId))->second;
+        Rat owner = M->rat(ratindex);
+        owner.score = owner.score.value() + 11 + (temp_rat.cloaked)? 2:0;
+        owner.RatMissile[eventData.missileHitData.missileId].exist = FALSE;
+      }
+    }break;
+  }
+  return temp_rat;
+}
+
+
+/* This is just for the sample version, rewrite your own */
+//Here process all events to update status in mazeRats_[], triggered by a event_timeout
+void ratStates() {
+  int ratindex;
+  packetInfo info;
+  Rat temp_rat;
+  //Process all events saved in events_all_player by ID
+  event_unprocessed_iter iter = events_all_player.begin();
+  while(iter != events_all_player.end()){
+    //Process this player's state
+    if(M->AllRats.find(iter->first) != M->AllRats.end()){
+      ratindex = (M->AllRats.find(iter->first))->second;
+      player_unprocessed event_per_player = iter->second;
+      //Already been sorted by EventID
+      player_unprocessed_iter iter_event;
+      for(iter_event=event_per_player.begin(); iter_event!=event_per_player.end(); iter_event++){
+        info = iter_event->second;
+        absoluteInfo absoInfo = info.ev_.absoInfo;
+        eventSpecificData eventData = info.ev_.eventData;
+        
+        if(iter_event == event_per_player.begin())  temp_rat = setAbsoInfo(temp_rat, absoInfo);
+        temp_rat = processEvent(temp_rat, eventData, info.ev_.type);
+      }
+      M->ratIs(temp_rat, ratindex);
+    }
+    iter++;
+  }
+  
+  //Process hbACK_set, if value > 50(no response for 10 secs), think it's dropped; else, add 1
+  int index = 0;
+  for(respond_set_iter iter = hbACK_set.begin(); iter!=hbACK_set.end(); iter++){
+    if(iter->second >= 50){
+      M->mazeplay[index] = FALSE;
+      temp_rat = M->rat(index);
+      temp_rat.playing = FALSE;
+      M->ratIs(temp_rat, index);
+    }
+    else iter->second++;
+    index++;
+  }
+
+  //Send heartbeat
+  info.hb_.heartbeatId = HeartbeatID;
+  HeartbeatID++;
+  info.hb_.sourceId == M->myRatId().value();
+  sendPacketToPlayer(HEARTBEAT, info);
+
+  //Clear uncommitted events
+  for(iter = events_all_player.begin(); iter != events_all_player.end(); iter++){
+    player_unprocessed empty_events = player_unprocessed();
+    iter->second = empty_events;
+  }
+
+  //Update own state in M
+  temp_rat = M->rat(0);
+  int temp;
+  //temp = M->dir.value();
+  M->dirIs(temp_rat.dir);
+  temp = M->xloc().value();
+  M->xlocIs(temp_rat.x);
+  temp = M->yloc().value();
+  M->ylocIs(temp_rat.y);
+  temp = M->score().value();
+  M->scoreIs(temp_rat.score);
 
 }
 
@@ -605,6 +765,8 @@ void manageMissiles() {
   /*Here updates all missiles in all rats, if the missile hit yourself, send a missilehit packet and born event, if the missile hit a wall,
     change it's exist to FALSE
   */
+
+  //move all missiles forward, if it hits wall, disappear it; if it hits self, send hit event
 
 
   /* Leave this up to you. */
@@ -631,14 +793,6 @@ void DoViewUpdate() {
 
 /* ----------------------------------------------------------------------- */
 
-/*
- * Sample code to send a packet to a specific destination
- */
-
-/*
- * Notice the call to ConvertOutgoing.  You might want to call ConvertOutgoing
- * before any call to sendto.
- */
 
 void copybit(uint32_t *temp, uint32_t src, uint8_t offset, uint8_t length) {
 				if(length > 32 || offset < 0 || length + offset > 32){
@@ -704,29 +858,29 @@ eventSpecificData parseEventData(uint8_t* address, uint8_t type){
   memcpy(&temp2, ((uint8_t*)address)+4, 8);
   eventSpecificData result;
   switch(type){
-    case 0:
+    case EVENTCLOAK:
             result.cloak = parsebit(temp1, 31, 1).bit_1;
             break;
 
-    case 1:
+    case EVENTMOVE:
             result.moveData.direction = parsebit(temp1, 30, 2).bit_8;
             result.moveData.speed = parsebit(temp1, 28, 2).bit_8;
             break;
 
-    case 2:
+    case EVENTBORN:
             result.bornData.position.x = parsebit(temp1, 27, 5).bit_16;
             result.bornData.position.y = parsebit(temp1, 23, 4).bit_16;
             result.bornData.direction = parsebit(temp1, 21, 2).bit_8;
             break;
 
-    case 3:
+    case EVENTSHOOT:
             result.missileProjData.missileId = parsebit(temp1, 30, 2).bit_8;
             result.missileProjData.position.x = parsebit(temp1, 25, 5).bit_16;
             result.missileProjData.position.y = parsebit(temp1, 21, 4).bit_16;
             result.missileProjData.direction = parsebit(temp1, 19, 2).bit_8;
             break;
 
-    case 4:
+    case EVENTHIT:
             result.missileHitData.ownerId = parsebit(temp1, 0, 32).bit_32;
             result.missileHitData.missileId = parsebit(temp2, 30, 2).bit_8;
             result.missileHitData.position.x = parsebit(temp2, 25, 5).bit_16;
@@ -752,25 +906,25 @@ void encodeEventData(uint32_t* temp1, uint32_t* temp2, uint8_t type, eventSpecif
 
 				switch(type) {
 								//event cloak
-								case 0:
+								case EVENTCLOAK:
 												copybit(temp1, eventData.cloak, 31, 1);
                         break;
 
 								//event movement
-								case 1:
+								case EVENTMOVE:
 												copybit(temp1, eventData.moveData.direction, 30, 2);
 												copybit(temp1, eventData.moveData.speed, 28, 2);
                         break;
 
 								//event born
-								case 2:
+								case EVENTBORN:
 												copybit(temp1, eventData.bornData.position.x, 27, 5);
                         copybit(temp1, eventData.bornData.position.y, 23, 4);
 												copybit(temp1, eventData.bornData.direction, 21, 2);
                         break;
 
 								//event missile projection
-								case 3:
+								case EVENTSHOOT:
 												copybit(temp1, eventData.missileProjData.missileId, 30, 2);
 												copybit(temp1, eventData.missileProjData.position.x, 25, 5);
                         copybit(temp1, eventData.missileProjData.position.y, 21, 4);
@@ -778,7 +932,7 @@ void encodeEventData(uint32_t* temp1, uint32_t* temp2, uint8_t type, eventSpecif
                         break;
 
 								//event missile hit
-								case 4:
+								case EVENTHIT:
 												copybit(temp1, eventData.missileHitData.ownerId, 0, 32);
 												copybit(temp2, eventData.missileHitData.missileId, 30, 2);
 												copybit(temp2, eventData.missileHitData.position.x, 25, 5);
@@ -1001,6 +1155,7 @@ void join_handler(unsigned char type, packetInfo info){
 
   switch(type) {
     case HEARTBEAT: {
+      if(info.hb_.sourceId == M->myRatId().value()) break;
       respond.hbACK_.heartbeatId   = info.hb_.heartbeatId;
       respond.hbACK_.sourceId      = M->myRatId().value(); //TODO: This may be not unique, think another way to fix it later
       respond.hbACK_.destinationId = info.hb_.sourceId;
@@ -1012,31 +1167,37 @@ void join_handler(unsigned char type, packetInfo info){
           1. Save all uncommitted events
           2. Update all received absolute information in mazeRats_
       */
+
+      if(info.SIRes_.sourceId == M->myRatId().value()) break;
       //If the SI response from this source has been received, break; else, save it
       if(hbACK_set.find(info.SIRes_.sourceId)!=hbACK_set.end()) break;
-      else hbACK_set.insert(info.SIRes_.sourceId);
+      else hbACK_set.insert({info.SIRes_.sourceId, 0});
 
       //Generate the uncommitted event for next timeslot
       respond.ev_.absoInfo = info.SIRes_.absoInfo;
       respond.ev_.sourceId = info.SIRes_.sourceId;
 
-      event_unprocessed temp_events;
+      player_unprocessed temp_events;
       for(int i=0; i<info.SIRes_.uncommitted_number; ++i){
         respond.ev_.type = info.SIRes_.uncommit[i].type;  
         respond.ev_.eventId = info.SIRes_.uncommit[i].eventId;
         respond.ev_.eventData = info.SIRes_.uncommit[i].eventData;
         temp_events.insert({respond.ev_.eventId, respond});
       }
-      events_all_player.insert({respond.ev_.sourceId, temp_events});
+      events_all_player.insert({respond.ev_.sourceId,temp_events});
       int index = 1;
       //Update information in mazeRats_, 0 is reserved for own
       for(; index < MAX_RATS; ++index){
-          if (M->AllRats.find(info.SIRes_.sourceId)==M->AllRats.end()){
+          if (M->AllRats.find(info.SIRes_.sourceId)==M->AllRats.end() && M->mazeplay[index]==false){
             M->AllRats.insert({info.SIRes_.sourceId, index});
+            M->mazeplay[index] = TRUE;
             break;
           }
       }
-      if(index == MAX_RATS) printf("Reach max rats limit, can not let new rat join!\n");
+      if(index >= MAX_RATS){
+        printf("Reach max rats limit, can not let new rat join!\n");
+        break;
+      } 
       Rat temp_rat;
       //TODO: add name
       //temp_rat.Name = "Tom";
@@ -1054,6 +1215,7 @@ void join_handler(unsigned char type, packetInfo info){
           temp_rat.RatMissile[i].dir = info.SIRes_.absoInfo.missiles[i].direction;
         }
       }
+      M->ratIs(temp_rat, index);
     }break;
   }
 }
@@ -1063,6 +1225,7 @@ void packet_handler(unsigned char type, packetInfo info) {
   event_unprocessed_iter iter;
   switch(type) {
     case HEARTBEAT: { 
+      if(info.hb_.sourceId == M->myRatId().value()) break;
       respond.hbACK_.heartbeatId   = info.hb_.heartbeatId;
       respond.hbACK_.sourceId      = M->myRatId().value(); //TODO: This may be not unique, think another way to fix it later
       respond.hbACK_.destinationId = info.hb_.sourceId;
@@ -1071,10 +1234,14 @@ void packet_handler(unsigned char type, packetInfo info) {
 
     case HEARTBEATACK: {
       //update the static set for heartbeat respond
-      hbACK_set.insert(info.hbACK_.sourceId);
+      if(info.hbACK_.sourceId == M->myRatId().value()) break;
+      //update the heartbeat response
+      respond_set_iter iter = hbACK_set.find(info.hbACK_.sourceId);
+      if(iter != hbACK_set.end()) iter->second = 0;
     }break;
 
     case EVENT: { 
+      if(info.ev_.sourceId == M->myRatId().value()) break;
       iter = events_all_player.find(info.ev_.sourceId);
       if(iter == events_all_player.end())  break; //exit if the player doesn't exist
       player_unprocessed_iter player_iter = iter->second.find(info.ev_.eventId);
@@ -1087,6 +1254,7 @@ void packet_handler(unsigned char type, packetInfo info) {
     }break;
 
     case EVENTACK: { 
+      if(info.evACK_.sourceId == M->myRatId().value()) break;
       if(info.evACK_.destinationId != M->myRatId().value())  break;
       std::map<EventId, respond_set>::iterator iter_ = local_event_resend.find(info.evACK_.eventId);
       if(iter_ == local_event_resend.end())  break; //event has already been committed
@@ -1094,6 +1262,25 @@ void packet_handler(unsigned char type, packetInfo info) {
     }break;
 
     case STATEREQUEST: { 
+      //Check whether any slot available for new player
+      int index = 1;
+      for(; index < MAX_RATS; ++index){
+          if (M->AllRats.find(info.SIReq_.sourceId)==M->AllRats.end() && M->mazeplay[index]==false){
+            M->AllRats.insert({info.SIReq_.sourceId, index});
+            M->mazeplay[index] = TRUE;
+            break;
+          }
+      }
+      if(index >= MAX_RATS){
+        printf("Reach max rats limit, can not let new rat join!\n");
+      }
+      else{
+        printf("Welcome new player!\n");
+        NotifyPlayer();
+      }
+
+      //Generate packet to responed
+      if(info.SIReq_.sourceId == M->myRatId().value()) break;
       respond.SIRes_.sourceId      = M->myRatId().value();
       respond.SIRes_.destinationId = info.SIReq_.sourceId;
       respond.SIRes_.absoInfo.score = M->score().value();

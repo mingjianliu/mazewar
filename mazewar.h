@@ -63,7 +63,7 @@ SOFTWARE.
 /* Feel free to modify.  This is the simplest version we came up with */
 
 /* A unique MAZEPORT will be assigned to your team by the TA */
-#define MAZEPORT 5000
+#define MAZEPORT 5018
 /* The multicast group for Mazewar is 224.1.1.1 */
 #define MAZEGROUP 0xe0010101
 #define MAZESERVICE "mazewar244B"
@@ -292,6 +292,7 @@ public:
   RatName myName_;
 	//Used to map Index with their ID
 	std::map<RatId, int> AllRats;
+  bool mazeplay[MAX_RATS];
 
 protected:
   MazewarInstance(string s)
@@ -301,6 +302,7 @@ protected:
     if (!myAddr_) {
       printf("Error allocating sockaddr variable");
     }
+    for(int i=0; i<MAX_RATS; i++) mazeplay[i] = FALSE;
   }
   Direction dir_;
   Direction dirPeek_;
@@ -327,7 +329,8 @@ extern MazewarInstance::Ptr M;
 #define MY_X_LOC M->xloc().value()
 #define MY_Y_LOC M->yloc().value()
 
-typedef std::set<uint32_t> respond_set;
+typedef std::map<uint32_t, int> respond_set;
+typedef std::map<uint32_t, int>::iterator respond_set_iter;
 typedef uint32_t EventId;
 typedef uint32_t PlayerID;
 

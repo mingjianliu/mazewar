@@ -123,7 +123,7 @@ struct _resources {
 } app_resources;
 
 String default_resources[] = {
-    "time_interval 500",
+    "time_interval 200",
 
     NULL,
 };
