@@ -113,18 +113,18 @@ typedef struct { unsigned short bits[16]; } BitCell;
 typedef char RatName[NAMESIZE];
 
 
-class Direction : public Ordinal<Direction, short> {
+class Direction : public Ordinal<Direction, uint8_t> {
 public:
-  Direction(short num) : Ordinal<Direction, short>(num) {
+  Direction(short num) : Ordinal<Direction, uint8_t>(num) {
     if (num < NORTH || num > NDIRECTION) {
       throw RangeException("Error: Unexpected value.\n");
     }
   }
 };
 
-class Loc : public Ordinal<Loc, short> {
+class Loc : public Ordinal<Loc, uint8_t> {
 public:
-  Loc(short num) : Ordinal<Loc, short>(num) {
+  Loc(short num) : Ordinal<Loc, uint8_t>(num) {
     if (num < 0) {
       throw RangeException("Error: Unexpected negative value.\n");
     }
@@ -177,7 +177,7 @@ class Rat {
 public:
   Rat() : playing(0), cloaked(0), x(1), y(1), score(0), dir(NORTH){
 		for(int i=0; i < MAX_MISSILES; i++){
-				this->RatMissile[i] = new Missile();
+				//this->RatMissile[i] = new Missile();
 		}	
 	};
 	RatName Name;
@@ -186,7 +186,7 @@ public:
   Loc x, y;
   Direction dir;
 	Score score;
-	Missile* RatMissile[MAX_MISSILES];
+	Missile RatMissile[MAX_MISSILES];
 };
 
 typedef RatAppearance RatApp_type[MAX_RATS];
@@ -284,9 +284,6 @@ public:
   RatName myName_;
 	//Used to map Index with their ID
 	std::map<RatIndexType, RatId> AllRats;
-	//Store actions to be processed in next two time slots
-	ActionSlot currentSlot;
-  ActionSlot nextSlot;
 
 protected:
   MazewarInstance(string s)
@@ -322,10 +319,14 @@ extern MazewarInstance::Ptr M;
 #define MY_X_LOC M->xloc().value()
 #define MY_Y_LOC M->yloc().value()
 
-typedef Position{
+typedef std::set<uint32_t> respond_set;
+typedef uint32_t EventId;
+typedef uint32_t PlayerID;
+
+struct Position_{
   uint8_t x;
   uint8_t y;
-}
+};
 
 /* Protocol packet information*/
 union parsedInfo{
@@ -348,7 +349,7 @@ struct heartbeatACK{
 
 struct missileInfo{
 	uint8_t missileId;
-	Position position;
+	Position_ position;
 	uint8_t direction;
 };
 
@@ -358,20 +359,20 @@ struct movement{
 };
 
 struct born{
-	Position position;
+	Position_ position;
 	uint8_t direction;
 };
 
 struct missileProjection{
 	uint8_t missileId;
-	Position position;
+	Position_ position;
 	uint8_t direction;
 };
 
 struct missileHit{
 	uint32_t ownerId;			
 	uint8_t missileId;
-	Position position;
+	Position_ position;
 	uint8_t direction;
 };
 
@@ -385,7 +386,7 @@ union eventSpecificData{
 
 struct absoluteInfo{
 	uint32_t score;
-  Position position;
+  Position_ position;
 	uint8_t direction;
 	bool cloak;
 	uint8_t missileNumber;
@@ -439,6 +440,11 @@ typedef union{
 				SIACK SIACK_;
 } packetInfo; 
 
+static respond_set hbACK_set;
+typedef std::map<EventId, packetInfo> player_unprocessed;
+typedef std::map<EventId, packetInfo>::iterator player_unprocessed_iter;
+typedef std::map<PlayerID, player_unprocessed> event_unprocessed;
+typedef std::map<PlayerID, player_unprocessed>::iterator event_unprocessed_iter;
 
 /* display.c */
 void InitDisplay(int, char **);
@@ -496,7 +502,7 @@ void ConvertOutgoing(MW244BPacket *);
 void ratState(void);
 void manageMissiles(void);
 void DoViewUpdate(void);
-MW244BPacket sendPacketToPlayer(unsigned char, packetInfo);
+void sendPacketToPlayer(unsigned char, packetInfo);
 void processPacket(MWEvent *);
 void netInit(void);
 void copybit(uint32_t, uint32_t, uint8_t, uint8_t);
@@ -506,8 +512,7 @@ eventSpecificData parseEventData(uint8_t*, uint8_t);
 uncommittedAction parseUncommit(uint8_t*);
 void encodeEventData(uint32_t*, uint32_t*, uint8_t, eventSpecificData);
 void memcpy_helper(void*, void*, std::size_t);
-//packetInfo packetParser(MW244BPacket*);
-
+packetInfo packetParser(MW244BPacket*);
 
 /* winsys.c */
 void InitWindow(int, char **);

@@ -21,6 +21,16 @@ MazewarInstance::Ptr M;
 
 /* Use this socket address to send packets to the multi-cast group. */
 static Sockaddr groupAddr;
+
+/*
+  event information
+*/
+static event_unprocessed events_all_player; //saved event to processed in the end of time slot
+static std::map<EventId, respond_set> local_event_resend; //events sent from local this time slot
+static uint32_t HeartbeatID = 1;
+static uint32_t NextEventID = 1;
+static uint32_t CommittedEvent = 0;
+
 #define MAX_OTHER_RATS (MAX_RATS - 1)
 
 int main(int argc, char *argv[]) {
@@ -824,16 +834,6 @@ packetInfo packetParser(MW244BPacket* pack) {
   return info;
 }
 
-typedef std::set <uint32_t> respond_set;
-typedef uint32_t EventId;
-typedef uint32_t PlayerID;
-static respond_set hbACK_set;
-static std::set<packetInfo> player_unprocessed;
-static std::map<PlayerID, player_unprocessed> event_unprocessed;
-static std::map<EventId, respond_set> local_event_resend; //saved events per time slot
-static uint32_t NextEventID = 1;
-static uint32_t CommittedEvent = 0;
-
 /*
   This function handles received packets as bellow:
     Heartbeat     - Directly send back HeartbeatACK
@@ -845,64 +845,69 @@ static uint32_t CommittedEvent = 0;
     STATEACK      - Delete STATEResponse in resend queue
 */
 void packet_handler(unsigned char type, packetInfo info) {
+  packetInfo respond;
+  event_unprocessed_iter iter;
   switch(type) {
-    case HEARTBEAT:
-      packetInfo respond;
+    case HEARTBEAT: { 
       respond.hbACK_.heartbeatId   = info.hb_.heartbeatId;
-      respond.hbACK_.sourceId      = M->myRatId(); //TODO: This may be not unique, think another way to fix it later
+      respond.hbACK_.sourceId      = M->myRatId().value(); //TODO: This may be not unique, think another way to fix it later
       respond.hbACK_.destinationId = info.hb_.sourceId;
       sendPacketToPlayer(HEARTBEATACK, respond);
-      break;
+      }break;
 
-    case HEARTBEATACK:
+    case HEARTBEATACK: {
       //update the static set for heartbeat respond
       hbACK_set.insert(info.hbACK_.sourceId);
-      break;
+      }break;
 
-    case EVENT:
-      auto player_iter = event_unprocessed.find(info.ev_.sourceId);
-      if(player_iter == event_unprocessed.end())  break; //exit if the player doesn't exist
-      auto event_iter = player_iter->second.find(info.ev_.EventId);
-      if(iter != player_iter->second.end()) break; //exit if the event already exist
-      packetInfo respond;
-      respond.evACK_.eventId       = info.ev_.EventId;
-      respond.evACK_.sourceId      = M->myRatId();
+    case EVENT: { 
+      iter = events_all_player.find(info.ev_.sourceId);
+      if(iter == events_all_player.end())  break; //exit if the player doesn't exist
+      player_unprocessed_iter player_iter = iter->second.find(info.ev_.eventId);
+      if(player_iter != iter->second.end()) break; //exit if the event already exist
+      iter->second.insert({info.ev_.eventId, info});
+      respond.evACK_.eventId       = info.ev_.eventId;
+      respond.evACK_.sourceId      = M->myRatId().value();
       respond.evACK_.destinationId = info.ev_.sourceId;
       sendPacketToPlayer(EVENTACK, respond);
-      break;
+      }break;
 
-    case EVENTACK:
-      if(info.evACK_.destinationId != M->myRatId())  break;
-      auto iter = local_event_resend.find(info.evACK_.eventId);
-      if(iter == local_event_resend.end())  break; //event has already been committed
-      local_event_resend->second.erase(info.evACK_.sourceId);
-      break;
+    case EVENTACK: { 
+      if(info.evACK_.destinationId != M->myRatId().value())  break;
+      std::map<EventId, respond_set>::iterator iter_ = local_event_resend.find(info.evACK_.eventId);
+      if(iter_ == local_event_resend.end())  break; //event has already been committed
+      iter_->second.erase(info.evACK_.sourceId);
+      }break;
 
-    case STATEREQUEST:
-      packetInfo respond;
-      respond.SIRes_.sourceId      = M->myRatId();
+    case STATEREQUEST: { 
+      respond.SIRes_.sourceId      = M->myRatId().value();
       respond.SIRes_.destinationId = info.SIReq_.sourceId;
       respond.SIRes_.absoInfo.score = M->score().value();
-      uint16_t position = 
-      respond.SIRes_.absoInfo.position = position;
+      respond.SIRes_.absoInfo.position.x = M->xloc().value();
+      respond.SIRes_.absoInfo.position.y = M->yloc().value();
       respond.SIRes_.absoInfo.direction = M->dir().value();
       respond.SIRes_.absoInfo.missileNumber = MAX_MISSILES;
-      Missile temp_missile[MAX_MISSILES] = *M->rat(0).RatMissile;
+      Rat temp_rat = M->rat(0);
+      Missile* temp_missile = temp_rat.RatMissile;
+      //Missile temp_missile[MAX_MISSILES] = temp_rat.RatMissile;
       for(int i=0; i<MAX_MISSILES; ++i){
-        respond.SIRes_.absoInfo.missiles[i].missileId = temp_missile[i].exist;
-        respond.SIRes_.absoInfo.missiles[i].position.x  = temp_missile[i].x.value();
-        respond.SIRes_.absoInfo.missiles[i].position.y  = temp_missile[i].y.value();
-        respond.SIRes_.absoInfo.missiles[i].direction = temp_missile[i].dir.value();
+        respond.SIRes_.absoInfo.missiles[i].missileId = temp_missile->exist;
+        respond.SIRes_.absoInfo.missiles[i].position.x = temp_missile->x.value();
+        respond.SIRes_.absoInfo.missiles[i].position.y = temp_missile->y.value();
+        respond.SIRes_.absoInfo.missiles[i].direction = temp_missile->dir.value();
+        temp_missile++;
       }
-      auto player_iter = event_unprocessed.find(info.ev_.M->myRatId());
-      respond.SIRes_.uncommitted_number = player_iter->second.size();
-      for(auto it: player_iter->second){ //size of all local events
-        respond.SIRes_.uncommit[i].type       =  it.ev_.type;
-        respond.SIRes_.uncommit[i].eventId    =  it.ev_.eventId;
-        respond.SIRes_.uncommit[i].eventData  =  it.ev_.eventData;
+      iter = events_all_player.find(M->myRatId().value());
+      respond.SIRes_.uncommitted_number = iter->second.size();
+      int i = 0;
+      for(player_unprocessed_iter iter_events = iter->second.begin(); iter_events != iter->second.end(); ++iter_events){ //size of all local events
+        respond.SIRes_.uncommit[i].type       =  iter_events->second.ev_.type;
+        respond.SIRes_.uncommit[i].eventId    =  iter_events->second.ev_.eventId;
+        respond.SIRes_.uncommit[i].eventData  =  iter_events->second.ev_.eventData;
+        ++i;
       }
       sendPacketToPlayer(STATERESPONSE, respond);
-      break;
+      }break;
 
     case STATERESPONSE:
       break;
@@ -1013,7 +1018,7 @@ void netInit() {
    * Now we can try to find a game to join; if none, start one.
    */
 
-  printf("\n");
+  printf("netinit finished!\n");
 
   /* set up some stuff strictly for this local sample */
   M->myRatIdIs(htonl(thisHost->sin_addr.s_addr));
