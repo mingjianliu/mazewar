@@ -18,6 +18,8 @@
 
 using namespace std;
 
+static int shoot_timer = 0;
+static int cloak_timer = 0;
 static bool updateView; /* true if update needed */
 MazewarInstance::Ptr M;
 
@@ -142,6 +144,8 @@ void play(void) {
     if (!M->peeking())
       switch (event.eventType) {
       case EVENT_TIMEOUT: {
+        shoot_timer--;
+        cloak_timer--;
         ratStates(); 
         manageMissiles();
         //After consistency resolved, state and view might be changed
@@ -480,6 +484,12 @@ void peekStop() {
 
 void shoot() { 
   //Add cooldown timer
+  if(shoot_timer > 0){
+    printf("Missile Projection still in Cooldown!\n");
+    return;
+  }
+  //set shoot timer = 3 seconds
+  shoot_timer = 15;
   Rat temp_rat = M->rat(0);
   Missile* temp_missile = temp_rat.RatMissile;
   int i;
@@ -507,6 +517,11 @@ void shoot() {
 /* ----------------------------------------------------------------------- */
 
 void cloak() { 
+  if(cloak_timer > 0){
+    printf("Cloak still in Cooldown!\n");
+    return;
+  }
+  cloak_timer = 15;
   //implement timer here
   eventSpecificData eventData;
   eventData.cloak = TRUE;
