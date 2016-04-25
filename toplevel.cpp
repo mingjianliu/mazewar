@@ -53,27 +53,28 @@ int main(int argc, char *argv[]) {
   strncpy(M->myName_, ratName, NAMESIZE);
   free(ratName);
 
-  MazeInit(argc, argv);
 
   if (argc == 5) {
-      M->xlocIs(atoi(argv[2]));
-      M->ylocIs(atoi(argv[3]));
-    // match input to direction representation
-    if (!strcmp(argv[4], "n"))
-      M->dirIs(NORTH);
-    else if (!strcmp(argv[4], "s"))
-      M->dirIs(SOUTH);
-    else if (!strcmp(argv[4], "e"))
-      M->dirIs(EAST);
-    else if (!strcmp(argv[4], "w"))
-      M->dirIs(WEST);
-    else
-      M->dirIs(NORTH);
-  } else {
-    NewPosition(M);
-  }
+    M->xlocIs(atoi(argv[2]));
+  M->ylocIs(atoi(argv[3]));
+  // match input to direction representation
+  if (!strcmp(argv[4], "n"))
+    M->dirIs(NORTH);
+  else if (!strcmp(argv[4], "s"))
+    M->dirIs(SOUTH);
+  else if (!strcmp(argv[4], "e"))
+    M->dirIs(EAST);
+  else if (!strcmp(argv[4], "w"))
+    M->dirIs(WEST);
+  else
+    M->dirIs(NORTH);
+  } 
 
-	JoinGame();
+  
+  MazeInit(argc, argv);
+
+  JoinGame();
+  
   play();
 
   return 0;
@@ -86,9 +87,9 @@ void JoinGame(){
   event.eventDetail = &incoming;
   //send SI request
 
-  int join_phase_finsh = 1;
-  //busy waiting, respond to hb, save SI response
-  while(join_phase_finsh){
+  int join_phase_finsh = 0;
+  //wait for 10 time slots i.e. 2 seconds, respond to hb, save SI response
+  while(join_phase_finsh<10){
     NextEvent(&event, M->theSocket());
     switch(event.eventType){
       case EVENT_NETWORK:
@@ -96,7 +97,7 @@ void JoinGame(){
         break;
 
       case EVENT_TIMEOUT:
-        join_phase_finsh = 0;
+        join_phase_finsh++;
         break;
 
       case EVENT_INT:
@@ -104,6 +105,7 @@ void JoinGame(){
         break;
     }
   }
+
   //Update own infomation, like x, y, dir
   Rat temp_rat = M->rat(0);
   //temp_rat.Name = M->myName_;
@@ -124,7 +126,7 @@ void JoinGame(){
   eventData.bornData.direction = temp_rat.dir.value();
   packet = eventPacketGenerator(EVENTBORN, eventData); 
   sendPacketToPlayer(EVENT, packet); 
-  NotifyPlayer();
+
 }
 
 
@@ -300,19 +302,19 @@ void forward(void) {
 
   switch (MY_DIR) {
   case NORTH:
-    if (!M->maze_[tx + 1][ty])
+    if (!M->maze_[tx + 1][ty] && !M->occupy_[tx + 1][ty])
       tx++;
     break;
   case SOUTH:
-    if (!M->maze_[tx - 1][ty])
+    if (!M->maze_[tx - 1][ty] && !M->occupy_[tx - 1][ty])
       tx--;
     break;
   case EAST:
-    if (!M->maze_[tx][ty + 1])
+    if (!M->maze_[tx][ty + 1] && !M->occupy_[tx][ty + 1])
       ty++;
     break;
   case WEST:
-    if (!M->maze_[tx][ty - 1])
+    if (!M->maze_[tx][ty - 1] && !M->occupy_[tx][ty - 1])
       ty--;
     break;
   default:
@@ -338,19 +340,19 @@ void backward() {
 
   switch (MY_DIR) {
   case NORTH:
-    if (!M->maze_[tx - 1][ty])
+    if (!M->maze_[tx - 1][ty] && !M->occupy_[tx - 1][ty])
       tx--;
     break;
   case SOUTH:
-    if (!M->maze_[tx + 1][ty])
+    if (!M->maze_[tx + 1][ty] && !M->occupy_[tx + 1][ty])
       tx++;
     break;
   case EAST:
-    if (!M->maze_[tx][ty - 1])
+    if (!M->maze_[tx][ty - 1] && !M->occupy_[tx][ty - 1])
       ty--;
     break;
   case WEST:
-    if (!M->maze_[tx][ty + 1])
+    if (!M->maze_[tx][ty + 1] && !M->occupy_[tx][ty + 1])
       ty++;
     break;
   default:
@@ -529,11 +531,11 @@ void quit(int sig) {
 /* ----------------------------------------------------------------------- */
 
 void NewPosition(MazewarInstance::Ptr m) {
-  Loc newX(0);
-  Loc newY(0);
-  Direction dir(0); /* start on occupied square */
+  Loc newX(MY_X_LOC);
+  Loc newY(MY_Y_LOC);
+  Direction dir(MY_DIR); /* start on occupied square */
 
-  while (M->maze_[newX.value()][newY.value()]) {
+  while (!M->maze_[newX.value()][newY.value()] && M->occupy_[newX.value()][newY.value()]) {
     /* MAZE[XY]MAX is a power of 2 */
     newX = Loc(random() & (MAZEXMAX - 1));
     newY = Loc(random() & (MAZEYMAX - 1));
@@ -691,6 +693,17 @@ Rat processEvent(Rat temp_rat, eventSpecificData eventData, uint8_t type){
 }
 
 
+void clearOccupy(void) {
+  int i, j;
+
+  for (i = 0; i < MAZEXMAX; i++) {
+    for (j = 0; j < MAZEYMAX; j++) {
+      M->occupy_[i][j] = FALSE;
+    }
+  }
+}
+
+
 /* This is just for the sample version, rewrite your own */
 //Here process all events to update status in mazeRats_[], triggered by a event_timeout
 void ratStates() {
@@ -756,6 +769,15 @@ void ratStates() {
   temp = M->score().value();
   M->scoreIs(temp_rat.score);
 
+  //update M->occupy_
+  clearOccupy();
+  for(int i=0; i<MAX_MISSILES; ++i){
+    if(M->rat(i).playing){
+      int x = M->rat(i).y.value();
+      int y = M->rat(i).x.value();
+      M->occupy_[x][y] = TRUE;
+    }
+  }
 }
 
 /* ----------------------------------------------------------------------- */
@@ -765,17 +787,61 @@ void manageMissiles() {
   /*Here updates all missiles in all rats, if the missile hit yourself, send a missilehit packet and born event, if the missile hit a wall,
     change it's exist to FALSE
   */
-
+  Rat temp_rat;
   //move all missiles forward, if it hits wall, disappear it; if it hits self, send hit event
+  for(int i=0; i<MAX_RATS; ++i){
+    //Check all rats
+    temp_rat = M->rat(i);
+    if(temp_rat.playing){
 
-
-  /* Leave this up to you. */
-  /*
-  //You may find the following lines useful
-  //This subtracts one from the current rat's score and updates the display
-  M->scoreIs( M->score().value()-1 );
-  UpdateScoreCard(M->myRatId().value());
-  */
+      for(int j=0; j<MAX_MISSILES; ++j){
+        if(temp_rat.RatMissile[j].exist){
+          //Move it forward
+          int tx = temp_rat.RatMissile[j].x.value();
+          int ty = temp_rat.RatMissile[j].y.value();
+        
+          switch (temp_rat.RatMissile[j].dir.value()) {
+          case NORTH:
+            if (!M->maze_[tx + 1][ty])
+              tx++;
+            break;
+          case SOUTH:
+            if (!M->maze_[tx - 1][ty])
+              tx--;
+            break;
+          case EAST:
+            if (!M->maze_[tx][ty + 1])
+              ty++;
+            break;
+          case WEST:
+            if (!M->maze_[tx][ty - 1])
+              ty--;
+            break;
+          }
+          if(tx != temp_rat.RatMissile[j].x.value() || ty != temp_rat.RatMissile[j].y.value()){
+            temp_rat.RatMissile[j].x = tx;
+            temp_rat.RatMissile[j].y = ty;
+            //check if self tagged
+            if(tx == M->xloc().value() && ty == M->yloc().value()){
+              eventSpecificData eventData;
+              for(std::map<RatId, int>::iterator iter = M->AllRats.begin(); iter != M->AllRats.end(); iter++){
+                if(iter->second == i)    eventData.missileHitData.ownerId = iter->first.value();
+              }
+              eventData.missileHitData.missileId  = j;
+              eventData.missileHitData.position.x = tx;
+              eventData.missileHitData.position.y = ty;
+              eventData.missileHitData.direction  = temp_rat.RatMissile[j].dir.value();
+              packetInfo info = eventPacketGenerator(EVENTHIT, eventData);
+              sendPacketToPlayer(EVENT, info);
+            }
+          } else{
+          //Hit the wall, disappear
+          temp_rat.RatMissile[j].exist = FALSE;
+          }
+        } 
+      }
+    }
+  }
 }
 
 /* ----------------------------------------------------------------------- */
@@ -1216,6 +1282,7 @@ void join_handler(unsigned char type, packetInfo info){
         }
       }
       M->ratIs(temp_rat, index);
+      M->occupy_[info.SIRes_.absoInfo.position.x][info.SIRes_.absoInfo.position.y] = TRUE;
     }break;
   }
 }
@@ -1275,6 +1342,11 @@ void packet_handler(unsigned char type, packetInfo info) {
         printf("Reach max rats limit, can not let new rat join!\n");
       }
       else{
+        Rat temp_rat;
+        //TODO: add name
+        //temp_rat.Name = "Tom";
+        temp_rat.playing = TRUE;
+        M->ratIs(temp_rat, index);
         printf("Welcome new player!\n");
         NotifyPlayer();
       }

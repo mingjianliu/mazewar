@@ -289,6 +289,7 @@ public:
 	void myIndexIs(RatIndexType index){ this->myRatIndex_ = index;}
 
   MazeType maze_;
+  MazeType occupy_;
   RatName myName_;
 	//Used to map Index with their ID
 	std::map<RatId, int> AllRats;
