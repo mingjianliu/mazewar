@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
   MazeInit(argc, argv);
 
   JoinGame();
-  
+
   play();
 
   return 0;
@@ -491,20 +491,21 @@ void shoot() {
   //set shoot timer = 3 seconds
   shoot_timer = 15;
   Rat temp_rat = M->rat(0);
-  Missile* temp_missile = temp_rat.RatMissile;
   int i;
   for(i=0; i<MAX_MISSILES; ++i){
-    if(!temp_missile->exist) break;
-    temp_missile++;
+    if(!temp_rat.RatMissile[i].exist) break;
   }
   if(i == MAX_MISSILES){
     printf("Max missile limit %d", MAX_MISSILES);
     return;
   }
-  temp_missile->exist = TRUE;
-  temp_missile->x = temp_rat.y;
-  temp_missile->y = temp_rat.x;
-  temp_missile->dir = temp_rat.dir;
+
+  Missile temp_missile;
+
+  temp_missile.exist = TRUE;
+  temp_missile.x = temp_rat.x;
+  temp_missile.y = temp_rat.y;
+  temp_missile.dir = temp_rat.dir;
   eventSpecificData eventData;
   eventData.missileProjData.missileId = i;
   eventData.missileProjData.position.x = temp_rat.x.value();
@@ -512,6 +513,8 @@ void shoot() {
   eventData.missileProjData.direction = temp_rat.dir.value();
   sendPacketToPlayer(EVENT, eventPacketGenerator(EVENTSHOOT, eventData));
 
+  temp_rat.RatMissile[i] = temp_missile;
+  M->ratIs(temp_rat, 0);
 }
 
 /* ----------------------------------------------------------------------- */
@@ -834,9 +837,14 @@ void manageMissiles() {
             break;
           }
           if(tx != temp_rat.RatMissile[j].x.value() || ty != temp_rat.RatMissile[j].y.value()){
+
+            //if this missile belongs to self, show it, set update view
+            if(i == 0)
+              showMissile(Loc(tx), Loc(ty), temp_rat.RatMissile[j].dir, temp_rat.RatMissile[j].x, temp_rat.RatMissile[j].y, TRUE);
             temp_rat.RatMissile[j].x = tx;
             temp_rat.RatMissile[j].y = ty;
-            //check if self tagged
+
+            //if this missile belongs to others, check if self tagged
             if(tx == M->xloc().value() && ty == M->yloc().value()){
               eventSpecificData eventData;
               for(std::map<RatId, int>::iterator iter = M->AllRats.begin(); iter != M->AllRats.end(); iter++){
@@ -851,8 +859,13 @@ void manageMissiles() {
             }
           } else{
           //Hit the wall, disappear
-          temp_rat.RatMissile[j].exist = FALSE;
+            temp_rat.RatMissile[j].exist = FALSE;
+            if(i == 0)
+              clearSquare(temp_rat.RatMissile[j].x, temp_rat.RatMissile[j].y);
+
+            
           }
+          M->ratIs(temp_rat, i);
         } 
       }
     }
@@ -869,6 +882,7 @@ void DoViewUpdate() {
     else
       ShowView(MY_X_LOC, MY_Y_LOC, MY_DIR);
     updateView = FALSE;
+
   }
 }
 
@@ -1497,7 +1511,7 @@ void netInit() {
   printf("netinit finished!\n");
 
   /* set up some stuff strictly for this local sample */
-  M->myRatIdIs(htonl(thisHost->sin_addr.s_addr));
+  M->myRatIdIs(random());
   M->scoreIs(0);
   SetMyRatIndexType(0);
 	M->AllRats.insert({M->myRatId(), M->myIndex().value()});

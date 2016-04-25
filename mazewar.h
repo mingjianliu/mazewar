@@ -476,7 +476,7 @@ void FlipBitmaps(void);
 void bitFlip(BitCell *, int size);
 void SwapBitmaps(void);
 void byteSwap(BitCell *, int size);
-
+void showMissile(Loc, Loc, Direction, Loc, Loc, bool);
 /* init.c */
 void MazeInit(int, char **);
 void ratStates(void);
