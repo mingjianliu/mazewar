@@ -63,7 +63,7 @@ SOFTWARE.
 /* Feel free to modify.  This is the simplest version we came up with */
 
 /* A unique MAZEPORT will be assigned to your team by the TA */
-#define MAZEPORT 5000
+#define MAZEPORT 5018
 /* The multicast group for Mazewar is 224.1.1.1 */
 #define MAZEGROUP 0xe0010101
 #define MAZESERVICE "mazewar244B"
@@ -71,6 +71,8 @@ SOFTWARE.
 /* The next two >must< be a power of two, because we subtract 1 from them
    to get a bitmask for random()
  */
+#define JOINPHASE 0
+#define PLAYPHASE 1
 #define MAX_UNCOMMITED 5
 #define MAZEXMAX 32
 #define MAZEYMAX 16
@@ -97,6 +99,12 @@ SOFTWARE.
 
 #define MAX_MISSILES 4
 
+#define EVENTCLOAK 0
+#define EVENTMOVE 1
+#define EVENTBORN 2
+#define EVENTSHOOT 3
+#define EVENTHIT 4
+
 using namespace std;
 
 /* types */
@@ -113,27 +121,27 @@ typedef struct { unsigned short bits[16]; } BitCell;
 typedef char RatName[NAMESIZE];
 
 
-class Direction : public Ordinal<Direction, short> {
+class Direction : public Ordinal<Direction, uint8_t> {
 public:
-  Direction(short num) : Ordinal<Direction, short>(num) {
+  Direction(short num) : Ordinal<Direction, uint8_t>(num) {
     if (num < NORTH || num > NDIRECTION) {
       throw RangeException("Error: Unexpected value.\n");
     }
   }
 };
 
-class Loc : public Ordinal<Loc, short> {
+class Loc : public Ordinal<Loc, uint8_t> {
 public:
-  Loc(short num) : Ordinal<Loc, short>(num) {
+  Loc(short num) : Ordinal<Loc, uint8_t>(num) {
     if (num < 0) {
       throw RangeException("Error: Unexpected negative value.\n");
     }
   }
 };
 
-class Score : public Ordinal<Score, int> {
+class Score : public Ordinal<Score, uint32_t> {
 public:
-  Score(int num) : Ordinal<Score, int>(num) {}
+  Score(int num) : Ordinal<Score, uint32_t>(num) {}
 };
 
 class RatIndexType : public Ordinal<RatIndexType, int> {
@@ -177,7 +185,7 @@ class Rat {
 public:
   Rat() : playing(0), cloaked(0), x(1), y(1), score(0), dir(NORTH){
 		for(int i=0; i < MAX_MISSILES; i++){
-				this->RatMissile[i] = new Missile();
+				//this->RatMissile[i] = new Missile();
 		}	
 	};
 	RatName Name;
@@ -186,7 +194,7 @@ public:
   Loc x, y;
   Direction dir;
 	Score score;
-	Missile* RatMissile[MAX_MISSILES];
+	Missile RatMissile[MAX_MISSILES];
 };
 
 typedef RatAppearance RatApp_type[MAX_RATS];
@@ -229,8 +237,6 @@ typedef struct {
   MW244BPacket *eventDetail; /* for incoming data */
   Sockaddr eventSource;
 } MWEvent;
-
-typedef map<RatId, MW244BPacket> ActionSlot;
 
 void *malloc();
 Sockaddr *resolveHost();
@@ -283,12 +289,11 @@ public:
 	void myIndexIs(RatIndexType index){ this->myRatIndex_ = index;}
 
   MazeType maze_;
+  MazeType occupy_;
   RatName myName_;
 	//Used to map Index with their ID
-	std::map<RatIndexType, RatId> AllRats;
-	//Store actions to be processed in next two time slots
-	ActionSlot currentSlot;
-  ActionSlot nextSlot;
+	std::map<uint32_t, int> AllRats;
+  bool mazeplay[MAX_RATS];
 
 protected:
   MazewarInstance(string s)
@@ -298,6 +303,7 @@ protected:
     if (!myAddr_) {
       printf("Error allocating sockaddr variable");
     }
+    for(int i=0; i<MAX_RATS; i++) mazeplay[i] = FALSE;
   }
   Direction dir_;
   Direction dirPeek_;
@@ -324,6 +330,14 @@ extern MazewarInstance::Ptr M;
 #define MY_X_LOC M->xloc().value()
 #define MY_Y_LOC M->yloc().value()
 
+typedef std::map<uint32_t, int> respond_set;
+typedef std::map<uint32_t, int>::iterator respond_set_iter;
+ 
+struct Position_{
+  uint8_t x;
+  uint8_t y;
+};
+
 /* Protocol packet information*/
 union parsedInfo{
   bool bit_1;
@@ -344,8 +358,8 @@ struct heartbeatACK{
 };
 
 struct missileInfo{
-	uint8_t missileId;
-	uint16_t position;
+	uint8_t exist;
+	Position_ position;
 	uint8_t direction;
 };
 
@@ -355,20 +369,20 @@ struct movement{
 };
 
 struct born{
-	uint16_t position;
+	Position_ position;
 	uint8_t direction;
 };
 
 struct missileProjection{
 	uint8_t missileId;
-	uint16_t position;
+	Position_ position;
 	uint8_t direction;
 };
 
 struct missileHit{
 	uint32_t ownerId;			
 	uint8_t missileId;
-	uint16_t position;
+	Position_ position;
 	uint8_t direction;
 };
 
@@ -382,7 +396,7 @@ union eventSpecificData{
 
 struct absoluteInfo{
 	uint32_t score;
-  uint16_t position;
+  Position_ position;
 	uint8_t direction;
 	bool cloak;
 	uint8_t missileNumber;
@@ -391,7 +405,7 @@ struct absoluteInfo{
 
 struct event{
   uint8_t type;
-	uint32_t EventId;
+	uint32_t eventId;
   uint32_t sourceId;
   absoluteInfo absoInfo;
 	eventSpecificData eventData;
@@ -409,7 +423,7 @@ struct SIReq{
 
 struct uncommittedAction{
   uint8_t type;
-	uint32_t EventId;
+	uint32_t eventId;
 	eventSpecificData eventData;
 };
 
@@ -417,7 +431,7 @@ struct SIRes{
 	uint32_t sourceId;
 	uint32_t destinationId;
   absoluteInfo absoInfo;
-	int uncommitted_number;
+	uint32_t uncommitted_number;
 	uncommittedAction uncommit[MAX_UNCOMMITED];
 };
 
@@ -436,6 +450,11 @@ typedef union{
 				SIACK SIACK_;
 } packetInfo; 
 
+static respond_set hbACK_set;
+typedef std::map<uint32_t, packetInfo> player_unprocessed;
+typedef std::map<uint32_t, packetInfo>::iterator player_unprocessed_iter;
+typedef std::map<uint32_t, player_unprocessed> event_unprocessed;
+typedef std::map<uint32_t, player_unprocessed>::iterator event_unprocessed_iter;
 
 /* display.c */
 void InitDisplay(int, char **);
@@ -455,7 +474,7 @@ void FlipBitmaps(void);
 void bitFlip(BitCell *, int size);
 void SwapBitmaps(void);
 void byteSwap(BitCell *, int size);
-
+void showMissile(Loc, Loc, Direction, Loc, Loc, bool);
 /* init.c */
 void MazeInit(int, char **);
 void ratStates(void);
@@ -493,8 +512,8 @@ void ConvertOutgoing(MW244BPacket *);
 void ratState(void);
 void manageMissiles(void);
 void DoViewUpdate(void);
-void sendPacketToPlayer(RatId);
-void processPacket(MWEvent *);
+void sendPacketToPlayer(unsigned char, packetInfo);
+void processPacket(MWEvent *, int);
 void netInit(void);
 void copybit(uint32_t, uint32_t, uint8_t, uint8_t);
 parsedInfo parsebit(uint32_t, uint8_t, uint8_t);
@@ -503,8 +522,8 @@ eventSpecificData parseEventData(uint8_t*, uint8_t);
 uncommittedAction parseUncommit(uint8_t*);
 void encodeEventData(uint32_t*, uint32_t*, uint8_t, eventSpecificData);
 void memcpy_helper(void*, void*, std::size_t);
-//packetInfo packetParser(MW244BPacket*);
-
+packetInfo packetParser(MW244BPacket*);
+packetInfo eventPacketGenerator(uint8_t, eventSpecificData);
 
 /* winsys.c */
 void InitWindow(int, char **);
