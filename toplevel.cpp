@@ -5,7 +5,6 @@
  *  DESCR:
  */
 
-/* #define DEBUG */
 
 #include "main.h"
 #include "mazewar.h"
