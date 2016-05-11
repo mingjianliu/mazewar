@@ -30,7 +30,7 @@ static Sockaddr groupAddr;
   event information
 */
 static event_unprocessed events_all_player; //saved event to processed in the end of time slot
-static std::map<EventId, respond_set> local_event_resend; //events sent from local this time slot
+static std::map<uint32_t, respond_set> local_event_resend; //events sent from local this time slot
 static uint32_t HeartbeatID = 1;
 static uint32_t NextEventID = 1;
 //static uint32_t CommittedEvent = 0;
@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
   MazeInit(argc, argv);
 
   JoinGame();
-
+  ShowAllPositions();
   play();
 
   return 0;
@@ -88,6 +88,10 @@ void JoinGame(){
   MW244BPacket incoming;
   event.eventDetail = &incoming;
   //send SI request
+  packetInfo packet;
+  int temp_val = M->myRatId().value();
+  packet.SIReq_.sourceId = temp_val;
+  sendPacketToPlayer(STATEREQUEST, packet); 
 
   int join_phase_finsh = 0;
   //wait for 10 time slots i.e. 2 seconds, respond to hb, save SI response
@@ -121,7 +125,6 @@ void JoinGame(){
   M->ratIs(temp_rat, 0);
 
   //send born event
-  packetInfo packet;
   eventSpecificData eventData;
   eventData.bornData.position.x = temp_rat.y.value();
   eventData.bornData.position.y = temp_rat.y.value();
@@ -254,8 +257,8 @@ absoluteInfo absoluteInfoGenerator(){
 packetInfo eventPacketGenerator(uint8_t eventtype, eventSpecificData eventData){
   packetInfo info;
   info.ev_.type = eventtype;
-  info.ev_.sourceId = M->myRatId().value();
-  info.ev_.eventId = NextEventID;
+  int temp_val = M->myRatId().value();
+  info.ev_.sourceId = temp_val;  info.ev_.eventId = NextEventID;
   NextEventID++;
   info.ev_.absoInfo = absoluteInfoGenerator();
   info.ev_.eventData = eventData;
@@ -607,7 +610,9 @@ char *GetRatName(RatIndexType ratIndex) {
 				if (ratIndex.value() == M->myIndex().value()) {
 								return (M->myName_);
 				} else {
-								return M->rat(ratIndex).Name;		
+                char buf[1];
+                sprintf(buf, "%d", ratIndex.value());
+								return ((char *)"Player %s", buf);
 				}				
 				return ((char *)"Dummy");
 }
@@ -733,6 +738,7 @@ void ratStates() {
   while(iter != events_all_player.end()){
     //Process this player's state
     if(M->AllRats.find(iter->first) != M->AllRats.end()){
+      int tempxxx = (M->AllRats.find(iter->first))->first;
       ratindex = (M->AllRats.find(iter->first))->second;
       player_unprocessed event_per_player = iter->second;
       //Already been sorted by EventID
@@ -750,6 +756,7 @@ void ratStates() {
     iter++;
   }
   
+  if(0){
   //Process hbACK_set, if value > 50(no response for 10 secs), think it's dropped; else, add 1
   int index = 0;
   for(respond_set_iter iter = hbACK_set.begin(); iter!=hbACK_set.end(); iter++){
@@ -762,11 +769,13 @@ void ratStates() {
     else iter->second++;
     index++;
   }
+}
 
   //Send heartbeat
   info.hb_.heartbeatId = HeartbeatID;
   HeartbeatID++;
-  info.hb_.sourceId == M->myRatId().value();
+  int temp_val = M->myRatId().value();
+  info.hb_.sourceId = temp_val;
   sendPacketToPlayer(HEARTBEAT, info);
 
   //Clear uncommitted events
@@ -789,7 +798,7 @@ void ratStates() {
 
   //update M->occupy_
   clearOccupy();
-  for(int i=0; i<MAX_MISSILES; ++i){
+  for(int i=0; i<MAX_RATS; ++i){
     if(M->rat(i).playing){
       int x = M->rat(i).y.value();
       int y = M->rat(i).x.value();
@@ -847,8 +856,8 @@ void manageMissiles() {
             //if this missile belongs to others, check if self tagged
             if(tx == M->xloc().value() && ty == M->yloc().value()){
               eventSpecificData eventData;
-              for(std::map<RatId, int>::iterator iter = M->AllRats.begin(); iter != M->AllRats.end(); iter++){
-                if(iter->second == i)    eventData.missileHitData.ownerId = iter->first.value();
+              for(std::map<uint32_t, int>::iterator iter = M->AllRats.begin(); iter != M->AllRats.end(); iter++){
+                if(iter->second == i)    eventData.missileHitData.ownerId = iter->first;
               }
               eventData.missileHitData.missileId  = j;
               eventData.missileHitData.position.x = tx;
@@ -1252,7 +1261,8 @@ void join_handler(unsigned char type, packetInfo info){
     case HEARTBEAT: {
       if(info.hb_.sourceId == M->myRatId().value()) break;
       respond.hbACK_.heartbeatId   = info.hb_.heartbeatId;
-      respond.hbACK_.sourceId      = M->myRatId().value(); //TODO: This may be not unique, think another way to fix it later
+      int temp_val = M->myRatId().value();
+      respond.hbACK_.sourceId      = temp_val;
       respond.hbACK_.destinationId = info.hb_.sourceId;
       sendPacketToPlayer(HEARTBEATACK, respond);
     }break;
@@ -1279,7 +1289,12 @@ void join_handler(unsigned char type, packetInfo info){
         respond.ev_.eventData = info.SIRes_.uncommit[i].eventData;
         temp_events.insert({respond.ev_.eventId, respond});
       }
-      events_all_player.insert({respond.ev_.sourceId,temp_events});
+      if(info.SIRes_.uncommitted_number !=0){
+        std::map<uint32_t, int>::iterator temp_index = M->AllRats.find(respond.ev_.sourceId);
+        if(temp_index != M->AllRats.end())
+        events_all_player[temp_index->second] = std::map<uint32_t, packetInfo>();
+      } 
+
       int index = 1;
       //Update information in mazeRats_, 0 is reserved for own
       for(; index < MAX_RATS; ++index){
@@ -1319,11 +1334,13 @@ void join_handler(unsigned char type, packetInfo info){
 void packet_handler(unsigned char type, packetInfo info) {
   packetInfo respond;
   event_unprocessed_iter iter;
+  int temp_val;
   switch(type) {
     case HEARTBEAT: { 
       if(info.hb_.sourceId == M->myRatId().value()) break;
       respond.hbACK_.heartbeatId   = info.hb_.heartbeatId;
-      respond.hbACK_.sourceId      = M->myRatId().value(); //TODO: This may be not unique, think another way to fix it later
+      temp_val = M->myRatId().value();
+      respond.hbACK_.sourceId      = temp_val;
       respond.hbACK_.destinationId = info.hb_.sourceId;
       sendPacketToPlayer(HEARTBEATACK, respond);
     }break;
@@ -1337,14 +1354,18 @@ void packet_handler(unsigned char type, packetInfo info) {
     }break;
 
     case EVENT: { 
-      if(info.ev_.sourceId == M->myRatId().value()) break;
       iter = events_all_player.find(info.ev_.sourceId);
       if(iter == events_all_player.end())  break; //exit if the player doesn't exist
+      player_unprocessed second = iter->second;
       player_unprocessed_iter player_iter = iter->second.find(info.ev_.eventId);
       if(player_iter != iter->second.end()) break; //exit if the event already exist
-      iter->second.insert({info.ev_.eventId, info});
+      second.insert({info.ev_.eventId, info});
+      events_all_player[info.ev_.sourceId][info.ev_.eventId] = info;
+
+      if(info.ev_.sourceId == M->myRatId().value()) break;
       respond.evACK_.eventId       = info.ev_.eventId;
-      respond.evACK_.sourceId      = M->myRatId().value();
+      temp_val = M->myRatId().value();
+      respond.hbACK_.sourceId      = temp_val;
       respond.evACK_.destinationId = info.ev_.sourceId;
       sendPacketToPlayer(EVENTACK, respond);
     }break;
@@ -1352,7 +1373,7 @@ void packet_handler(unsigned char type, packetInfo info) {
     case EVENTACK: { 
       if(info.evACK_.sourceId == M->myRatId().value()) break;
       if(info.evACK_.destinationId != M->myRatId().value())  break;
-      std::map<EventId, respond_set>::iterator iter_ = local_event_resend.find(info.evACK_.eventId);
+      std::map<uint32_t, respond_set>::iterator iter_ = local_event_resend.find(info.evACK_.eventId);
       if(iter_ == local_event_resend.end())  break; //event has already been committed
       iter_->second.erase(info.evACK_.sourceId);
     }break;
@@ -1378,11 +1399,13 @@ void packet_handler(unsigned char type, packetInfo info) {
         M->ratIs(temp_rat, index);
         printf("Welcome new player!\n");
         NotifyPlayer();
+        events_all_player[info.SIReq_.sourceId] = std::map<uint32_t, packetInfo>();
       }
 
       //Generate packet to responed
       if(info.SIReq_.sourceId == M->myRatId().value()) break;
-      respond.SIRes_.sourceId      = M->myRatId().value();
+      temp_val = M->myRatId().value();
+      respond.hbACK_.sourceId      = temp_val;
       respond.SIRes_.destinationId = info.SIReq_.sourceId;
       respond.SIRes_.absoInfo.score = M->score().value();
       respond.SIRes_.absoInfo.position.x = M->xloc().value();
@@ -1394,21 +1417,26 @@ void packet_handler(unsigned char type, packetInfo info) {
       //Missile temp_missile[MAX_MISSILES] = temp_rat.RatMissile;
       for(int i=0; i<MAX_MISSILES; ++i){
         respond.SIRes_.absoInfo.missiles[i].exist = temp_missile->exist;
-        if(temp_missile->exist) respond.SIRes_.absoInfo.missileNumber += 1<<i;
         respond.SIRes_.absoInfo.missiles[i].position.x = temp_missile->x.value();
         respond.SIRes_.absoInfo.missiles[i].position.y = temp_missile->y.value();
         respond.SIRes_.absoInfo.missiles[i].direction = temp_missile->dir.value();
         temp_missile++;
       }
       iter = events_all_player.find(M->myRatId().value());
-      respond.SIRes_.uncommitted_number = iter->second.size();
-      int i = 0;
-      for(player_unprocessed_iter iter_events = iter->second.begin(); iter_events != iter->second.end(); ++iter_events){ //size of all local events
-        respond.SIRes_.uncommit[i].type       =  iter_events->second.ev_.type;
-        respond.SIRes_.uncommit[i].eventId    =  iter_events->second.ev_.eventId;
-        respond.SIRes_.uncommit[i].eventData  =  iter_events->second.ev_.eventData;
-        ++i;
-      }
+      respond.SIRes_.uncommitted_number = 0;
+      //respond.SIRes_.uncommitted_number = iter->second.size();
+      //if(iter->second.size() != 0){
+      //int i = 0;
+      //for(player_unprocessed_iter iter_events = iter->second.begin(); iter_events != iter->second.end(); ++iter_events){ //size of all local events
+      //  respond.SIRes_.uncommit[i].type       =  iter_events->second.ev_.type;
+      //  respond.SIRes_.uncommit[i].eventId    =  iter_events->second.ev_.eventId;
+      //  respond.SIRes_.uncommit[i].eventData  =  iter_events->second.ev_.eventData;
+      //  ++i;
+      //}
+      
+      //else{
+     //   respond.SIRes_.uncommitted_number = 0;
+      //}
       sendPacketToPlayer(STATERESPONSE, respond);
     }break;
 
@@ -1511,10 +1539,11 @@ void netInit() {
   printf("netinit finished!\n");
 
   /* set up some stuff strictly for this local sample */
-  M->myRatIdIs(random());
+  uint32_t temp = random();
+  M->myRatIdIs(temp);
   M->scoreIs(0);
   SetMyRatIndexType(0);
-	M->AllRats.insert({M->myRatId(), M->myIndex().value()});
+	M->AllRats.insert({temp, M->myIndex().value()});
 
   /* Get the multi-cast address ready to use in SendData()
      calls. */

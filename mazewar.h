@@ -292,7 +292,7 @@ public:
   MazeType occupy_;
   RatName myName_;
 	//Used to map Index with their ID
-	std::map<RatId, int> AllRats;
+	std::map<uint32_t, int> AllRats;
   bool mazeplay[MAX_RATS];
 
 protected:
@@ -332,9 +332,7 @@ extern MazewarInstance::Ptr M;
 
 typedef std::map<uint32_t, int> respond_set;
 typedef std::map<uint32_t, int>::iterator respond_set_iter;
-typedef uint32_t EventId;
-typedef uint32_t PlayerID;
-
+ 
 struct Position_{
   uint8_t x;
   uint8_t y;
@@ -407,14 +405,14 @@ struct absoluteInfo{
 
 struct event{
   uint8_t type;
-	EventId eventId;
+	uint32_t eventId;
   uint32_t sourceId;
   absoluteInfo absoInfo;
 	eventSpecificData eventData;
 };
 
 struct eventACK{
-  EventId eventId;
+  uint32_t eventId;
 	uint32_t sourceId;
 	uint32_t destinationId;
 };
@@ -425,7 +423,7 @@ struct SIReq{
 
 struct uncommittedAction{
   uint8_t type;
-	EventId eventId;
+	uint32_t eventId;
 	eventSpecificData eventData;
 };
 
@@ -453,10 +451,10 @@ typedef union{
 } packetInfo; 
 
 static respond_set hbACK_set;
-typedef std::map<EventId, packetInfo> player_unprocessed;
-typedef std::map<EventId, packetInfo>::iterator player_unprocessed_iter;
-typedef std::map<PlayerID, player_unprocessed> event_unprocessed;
-typedef std::map<PlayerID, player_unprocessed>::iterator event_unprocessed_iter;
+typedef std::map<uint32_t, packetInfo> player_unprocessed;
+typedef std::map<uint32_t, packetInfo>::iterator player_unprocessed_iter;
+typedef std::map<uint32_t, player_unprocessed> event_unprocessed;
+typedef std::map<uint32_t, player_unprocessed>::iterator event_unprocessed_iter;
 
 /* display.c */
 void InitDisplay(int, char **);
